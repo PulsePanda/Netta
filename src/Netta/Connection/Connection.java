@@ -35,10 +35,10 @@ public abstract class Connection {
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	protected Socket connectedSocket;
-	private Kript kript;
+	// private Kript kript;
 
 	public Connection() {
-		kript = new Kript();
+		// kript = new Kript();
 	}
 
 	/**
