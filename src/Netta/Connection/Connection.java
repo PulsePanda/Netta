@@ -151,7 +151,7 @@ public abstract class Connection {
 	 *             thrown when there is an error sending a packet to the socket.
 	 *             Details in the exception object's message()
 	 */
-	protected boolean SendPacket(Packet p) throws SendPacketException {
+	public boolean SendPacket(Packet p) throws SendPacketException {
 		if (!connectionActive)
 			return false;
 
@@ -178,7 +178,7 @@ public abstract class Connection {
 	 *             thrown when there is an error reading a packet from the
 	 *             socket. Details in the exception object's message()
 	 */
-	protected Packet ReceivePacket() throws ReadPacketException {
+	public Packet ReceivePacket() throws ReadPacketException {
 		Packet p = new Packet(Packet.PACKET_TYPE.NULL, "");
 
 		if (!connectionActive)
