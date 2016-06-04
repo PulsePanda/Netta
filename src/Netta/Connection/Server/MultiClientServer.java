@@ -24,7 +24,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
-import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.ServerInitializeException;
 
 public abstract class MultiClientServer extends ServerTemplate {
@@ -84,17 +83,13 @@ public abstract class MultiClientServer extends ServerTemplate {
 		while (threadActive) {
 			try {
 				Socket s = serverSocket.accept();
-				ConnectedClient temp = new ConnectedClient(s);
-				connectedClients.add(temp);
 				System.out.println("Client connection caught and initialized. Client: " + s);
 				System.out.println("Connection with " + s + " now listening for incoming packets.");
-				ThreadAction(temp);
+				ThreadAction(s);
 				CleanClientList();
 			} catch (SocketTimeoutException e) {
 			} catch (IOException e) {
 				System.err.println("Error accepting a client. Connection refused and reset.");
-			} catch (ConnectionInitializationException e) {
-				System.err.println(e.getMessage() + " Connection refused and reset.");
 			}
 		}
 	}
@@ -103,15 +98,19 @@ public abstract class MultiClientServer extends ServerTemplate {
 	 * By default, this method does nothing.
 	 * 
 	 * This method is called every time a new client is connected and
-	 * initialized. The parameter is the object containing the connected
-	 * client's details. Override this function to be able to retrieve the newly
-	 * connected client. This will also allow you to create a child class of
-	 * ConnectedClient, and assign it to the newly accepted connections.
+	 * initialized. The parameter is the connected client's socket. Override
+	 * this function to be able to retrieve the newly connected client. This
+	 * will also allow you to create a child class of ConnectedClient, and
+	 * assign it to the newly accepted connections.
+	 * 
+	 * NOTE: The MultiClientServer has a built in ArrayList of type
+	 * ConnectedClients to organize and store all connected clients. By default
+	 * it is not used.
 	 * 
 	 * @param client
-	 *            that was accepted by the server
+	 *            socket that was accepted by the server
 	 */
-	protected void ThreadAction(ConnectedClient client) {
+	public void ThreadAction(Socket client) {
 
 	}
 

@@ -24,7 +24,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import Kript.Kript;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.ReadPacketException;
@@ -35,10 +34,8 @@ public abstract class Connection {
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	protected Socket connectedSocket;
-	// private Kript kript;
 
 	public Connection() {
-		// kript = new Kript();
 	}
 
 	/**

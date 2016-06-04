@@ -50,7 +50,7 @@ public class ConnectedClient extends Connection implements Runnable {
 		}
 	}
 
-	protected void ThreadAction(Packet p) {
+	public void ThreadAction(Packet p) {
 		if (p.packetType == Packet.PACKET_TYPE.Message)
 			System.out.println(p.packetString);
 		else if (p.packetType == Packet.PACKET_TYPE.CloseConnection) {
