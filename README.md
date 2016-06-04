@@ -3,7 +3,7 @@
 Designed for ease of use, this Java library handles both Server side and Client side.
 
 ## JavaDocs
-This library comes with JavaDocs in the exported versions. Simply include the docs within your project for easier integration use.
+For ease of use, Netta comes with Javadoc built into the source code for all necissary files. Simply import the Javadoc from the .jar file, and you're good to go! All information regarding implementation of server and/or client classes are found within the Javadoc for each class constructor, as well within the wiki*.
 
 ### Client
 Netta provides a client class to be extended by the developer. This class handles everything from socket creation to Input Output
@@ -15,3 +15,5 @@ The Single Client Server is designed for a one on one connection only. It accept
 
 ### Mutliple Client Server
 The Multi Client Server is designed to act as a multi-point connection hub for clients. Like most servers today, thiss can be used for things such as chat clients, patch servers, or game servers among others. This server starts listening and keeps listening until told otherwise. When a client connects, the ThreadAction(ClientConnection) method is called, with the new client passed. By default, this method does nothing, so to add functionality you must overload it in your own class.
+
+* coming soon
