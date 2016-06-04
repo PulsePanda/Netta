@@ -1,4 +1,4 @@
-Centrum.Connection
-Centrum.Connection.Client
-Centrum.Connection.Server
-Centrum.Exceptions
+Netta.Connection
+Netta.Connection.Client
+Netta.Connection.Server
+Netta.Exceptions
