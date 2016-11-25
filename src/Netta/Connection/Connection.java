@@ -22,8 +22,10 @@ package Netta.Connection;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.BigInteger;
 import java.net.Socket;
 
+import Kript.Kript;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.ReadPacketException;
@@ -34,8 +36,10 @@ public abstract class Connection {
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	protected Socket connectedSocket;
+	private Kript kript;
 
 	public Connection() {
+		kript = new Kript();
 	}
 
 	/**
@@ -153,7 +157,14 @@ public abstract class Connection {
 			return false;
 
 		try {
-			out.writeObject(p);
+			byte[] packetBytes = p.ToBytes();
+			BigInteger[] encryptedBytes = new BigInteger[packetBytes.length];
+
+			for (int i = 0; i < packetBytes.length; i++) {
+				encryptedBytes[i] = kript.encrypt(packetBytes[i]);
+			}
+
+			out.writeObject(encryptedBytes);
 			out.flush();
 			return true;
 		} catch (IOException e) {
@@ -182,7 +193,16 @@ public abstract class Connection {
 			return p;
 
 		try {
-			p = (Packet) in.readObject();
+			BigInteger[] encryptedBytes = (BigInteger[]) in.readObject();
+			byte[] packetBytes = new byte[encryptedBytes.length];
+			
+			for(int i = 0; i < encryptedBytes.length; i++){
+				packetBytes[i] = kript.decrypt(encryptedBytes[i]);
+			}
+			
+			p = new Packet(packetBytes);
+			
+			return p;
 		} catch (IOException e) {
 			throw new ReadPacketException(
 					"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
@@ -190,7 +210,5 @@ public abstract class Connection {
 			throw new ReadPacketException(
 					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
 		}
-
-		return p;
 	}
 }
