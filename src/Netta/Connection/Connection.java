@@ -122,21 +122,6 @@ public abstract class Connection {
 	}
 
 	/**
-	 * Get the Socket object associated with this connection object
-	 * 
-	 * @return Socket associated with this object
-	 */
-	// public Socket GetSocket() {
-	// return socket;
-	// }
-
-	// protected boolean SetSocket(Socket s) {
-	// if (!active)
-	// connectedSocket = s;
-	// return !active;
-	// }
-
-	/**
 	 * Send Packet. This method sends a packet p to the connected socket. It is
 	 * important to note that this send is NOT converted to bytes, it is only
 	 * sent as a packet. This function cannot be called if the connection is not
