@@ -180,13 +180,89 @@ public abstract class Connection {
 		try {
 			BigInteger[] encryptedBytes = (BigInteger[]) in.readObject();
 			byte[] packetBytes = new byte[encryptedBytes.length];
-			
-			for(int i = 0; i < encryptedBytes.length; i++){
+
+			for (int i = 0; i < encryptedBytes.length; i++) {
 				packetBytes[i] = kript.decrypt(encryptedBytes[i]);
 			}
-			
+
 			p = new Packet(packetBytes);
-			
+
+			return p;
+		} catch (IOException e) {
+			throw new ReadPacketException(
+					"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
+		} catch (ClassNotFoundException e) {
+			throw new ReadPacketException(
+					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
+		}
+	}
+
+	/**
+	 * Send an unencrypted Packet. This method sends a packet p to the connected
+	 * socket. It is important to note that this send is NOT converted to bytes,
+	 * it is only sent as a packet. This function cannot be called if the
+	 * connection is not active.
+	 * 
+	 * @param p
+	 *            packet being sent to the socket connection
+	 * 
+	 * @return boolean value based on the success of the send. True if object
+	 *         sent successfully, else false.
+	 * 
+	 * @throws SendPacketException
+	 *             thrown when there is an error sending a packet to the socket.
+	 *             Details in the exception object's message()
+	 */
+	public boolean SendUnencryptedPacket(Packet p) throws SendPacketException {
+		if (!connectionActive)
+			return false;
+
+		try {
+			byte[] packetBytes = p.ToBytes();
+			BigInteger[] encryptedBytes = new BigInteger[packetBytes.length];
+
+			for (int i = 0; i < packetBytes.length; i++) {
+				encryptedBytes[i] = kript.encrypt(packetBytes[i]);
+			}
+
+			out.writeObject(encryptedBytes);
+			out.flush();
+			return true;
+		} catch (IOException e) {
+			throw new SendPacketException("Error sending packet to socket. PacketType: " + p.packetType.toString()
+					+ ". PacketMessage: " + p.packetString);
+		}
+	}
+
+	/**
+	 * Read an unencrypted Packet. This method reads a packet from the connected
+	 * sockets input stream. It is important to note, this method reads the
+	 * Packet object DIRECTLY, there is no byte conversion. This function cannot
+	 * be called if the connection is not active.
+	 * 
+	 * @return packet from the sockets input stream. If there is an error or
+	 *         anything else goes wrong, returns Packet.PACKET_TYPE.NULL packet
+	 * 
+	 * @throws ReadPacketException
+	 *             thrown when there is an error reading a packet from the
+	 *             socket. Details in the exception object's message()
+	 */
+	public Packet ReceiveUnencryptedPacket() throws ReadPacketException {
+		Packet p = new Packet(Packet.PACKET_TYPE.NULL, "");
+
+		if (!connectionActive)
+			return p;
+
+		try {
+			BigInteger[] encryptedBytes = (BigInteger[]) in.readObject();
+			byte[] packetBytes = new byte[encryptedBytes.length];
+
+			for (int i = 0; i < encryptedBytes.length; i++) {
+				packetBytes[i] = kript.decrypt(encryptedBytes[i]);
+			}
+
+			p = new Packet(packetBytes);
+
 			return p;
 		} catch (IOException e) {
 			throw new ReadPacketException(
