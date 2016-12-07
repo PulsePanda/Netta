@@ -22,6 +22,7 @@ package Netta.Connection.Server;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import Netta.Exceptions.ServerInitializeException;
@@ -44,8 +45,10 @@ public abstract class MultiClientServer extends ServerTemplate {
 	 * 
 	 * @param port
 	 *            that you want the server to host on
+	 * @throws NoSuchAlgorithmException
+	 *             when there is an issue creating the RSA cipher.
 	 */
-	public MultiClientServer(int port) {
+	public MultiClientServer(int port) throws NoSuchAlgorithmException {
 		super(port);
 		connectedClients = new ArrayList<ConnectedClient>();
 	}
@@ -86,6 +89,8 @@ public abstract class MultiClientServer extends ServerTemplate {
 				System.out.println("Client connection caught and initialized. Client: " + s);
 				System.out.println("Connection with " + s + " now listening for incoming packets.");
 				ThreadAction(s);
+				// GENERATE NEW KRIPT OBJECT? SO AS TO HAVE SEPERATE KEYS PER
+				// CONNECTION //////////
 				CleanClientList();
 			} catch (SocketTimeoutException e) {
 			} catch (IOException e) {

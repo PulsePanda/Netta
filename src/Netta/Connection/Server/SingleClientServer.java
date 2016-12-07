@@ -21,10 +21,12 @@ package Netta.Connection.Server;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.security.NoSuchAlgorithmException;
 
 import Netta.Connection.Packet;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
+import Netta.Exceptions.HandShakeException;
 import Netta.Exceptions.ReadPacketException;
 import Netta.Exceptions.ServerInitializeException;
 
@@ -42,11 +44,13 @@ public abstract class SingleClientServer extends ServerTemplate {
 	 * 
 	 * @param port
 	 *            the server must host on
+	 * @throws NoSuchAlgorithmException
+	 *             when there is an issue creating the RSA cipher.
 	 * @throws ServerInitializeException
 	 *             if there is an error creating the server for any reason.
 	 *             Details are in the exceptions message.
 	 */
-	public SingleClientServer(int port) {
+	public SingleClientServer(int port) throws NoSuchAlgorithmException {
 		super(port);
 	}
 
@@ -74,11 +78,14 @@ public abstract class SingleClientServer extends ServerTemplate {
 				OpenIOStreams();
 				System.out.println("Client connection caught and initialized. Client: " + connectedSocket);
 				System.out.println("Connection with " + connectedSocket + " now listening for incoming packets.");
+				HandShake();
 			} catch (SocketTimeoutException e) {
 			} catch (IOException e) {
 				System.err.println("Error accepting a client. Connection refused and reset.");
 			} catch (ConnectionInitializationException e) {
 				System.err.println(e.getMessage() + " Connection refused and reset.");
+			} catch (HandShakeException e) {
+				System.err.println(e.getMessage());
 			}
 
 			while (IsConnectionActive()) {

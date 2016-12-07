@@ -26,6 +26,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.util.ArrayList;
 
 public class Packet implements Serializable {
@@ -38,6 +39,7 @@ public class Packet implements Serializable {
 	public String packetString, senderID;
 	public int packetInt;
 	public boolean packetBool;
+	public PublicKey packetKey;
 	public PACKET_TYPE packetType;
 
 	/**

@@ -22,7 +22,6 @@ package Netta.Connection;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.math.BigInteger;
 import java.net.Socket;
 
 import Kript.Kript;
@@ -36,10 +35,10 @@ public abstract class Connection {
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	protected Socket connectedSocket;
-	private Kript kript;
+	protected Kript kript;
 
-	public Connection() {
-		kript = new Kript();
+	public Connection(Kript kript) {
+		this.kript = kript;
 	}
 
 	/**
@@ -69,6 +68,7 @@ public abstract class Connection {
 		try {
 			in = new ObjectInputStream(connectedSocket.getInputStream());
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new ConnectionInitializationException("Error creating client input stream on initialization.");
 		}
 
@@ -134,8 +134,8 @@ public abstract class Connection {
 	 *         sent successfully, else false.
 	 * 
 	 * @throws SendPacketException
-	 *             thrown when there is an error sending a packet to the socket.
-	 *             Details in the exception object's message()
+	 *             thrown when there is an error creating or sending a packet to
+	 *             the socket. Details in the exception object's message()
 	 */
 	public boolean SendPacket(Packet p) throws SendPacketException {
 		if (!connectionActive)
@@ -143,11 +143,9 @@ public abstract class Connection {
 
 		try {
 			byte[] packetBytes = p.ToBytes();
-			BigInteger[] encryptedBytes = new BigInteger[packetBytes.length];
+			byte[] encryptedBytes = new byte[packetBytes.length];
 
-			for (int i = 0; i < packetBytes.length; i++) {
-				encryptedBytes[i] = kript.encrypt(packetBytes[i]);
-			}
+			encryptedBytes = kript.encrypt(packetBytes);
 
 			out.writeObject(encryptedBytes);
 			out.flush();
@@ -155,6 +153,9 @@ public abstract class Connection {
 		} catch (IOException e) {
 			throw new SendPacketException("Error sending packet to socket. PacketType: " + p.packetType.toString()
 					+ ". PacketMessage: " + p.packetString);
+		} catch (Exception e) {
+			throw new SendPacketException(
+					"Error encrypting data to send. Likely an issue with generating the RSA cipher.");
 		}
 	}
 
@@ -178,30 +179,31 @@ public abstract class Connection {
 			return p;
 
 		try {
-			BigInteger[] encryptedBytes = (BigInteger[]) in.readObject();
+			byte[] encryptedBytes = (byte[]) in.readObject();
 			byte[] packetBytes = new byte[encryptedBytes.length];
 
-			for (int i = 0; i < encryptedBytes.length; i++) {
-				packetBytes[i] = kript.decrypt(encryptedBytes[i]);
-			}
+			packetBytes = kript.decrypt(encryptedBytes);
 
 			p = new Packet(packetBytes);
 
 			return p;
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new ReadPacketException(
 					"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
 		} catch (ClassNotFoundException e) {
 			throw new ReadPacketException(
 					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
+		} catch (Exception e) {
+			throw new ReadPacketException("Error decrypting packet. Likely an issue creating the RSA cipher.");
 		}
 	}
 
 	/**
-	 * Send an unencrypted Packet. This method sends a packet p to the connected
-	 * socket. It is important to note that this send is NOT converted to bytes,
-	 * it is only sent as a packet. This function cannot be called if the
-	 * connection is not active.
+	 * Send Packet. This method sends a packet p to the connected socket. It is
+	 * important to note that this send is NOT converted to bytes, it is only
+	 * sent as a packet. This function cannot be called if the connection is not
+	 * active.
 	 * 
 	 * @param p
 	 *            packet being sent to the socket connection
@@ -218,14 +220,7 @@ public abstract class Connection {
 			return false;
 
 		try {
-			byte[] packetBytes = p.ToBytes();
-			BigInteger[] encryptedBytes = new BigInteger[packetBytes.length];
-
-			for (int i = 0; i < packetBytes.length; i++) {
-				encryptedBytes[i] = kript.encrypt(packetBytes[i]);
-			}
-
-			out.writeObject(encryptedBytes);
+			out.writeObject(p);
 			out.flush();
 			return true;
 		} catch (IOException e) {
@@ -235,10 +230,10 @@ public abstract class Connection {
 	}
 
 	/**
-	 * Read an unencrypted Packet. This method reads a packet from the connected
-	 * sockets input stream. It is important to note, this method reads the
-	 * Packet object DIRECTLY, there is no byte conversion. This function cannot
-	 * be called if the connection is not active.
+	 * Read Packet. This method reads a packet from the connected sockets input
+	 * stream. It is important to note, this method reads the Packet object
+	 * DIRECTLY, there is no byte conversion. This function cannot be called if
+	 * the connection is not active.
 	 * 
 	 * @return packet from the sockets input stream. If there is an error or
 	 *         anything else goes wrong, returns Packet.PACKET_TYPE.NULL packet
@@ -254,16 +249,7 @@ public abstract class Connection {
 			return p;
 
 		try {
-			BigInteger[] encryptedBytes = (BigInteger[]) in.readObject();
-			byte[] packetBytes = new byte[encryptedBytes.length];
-
-			for (int i = 0; i < encryptedBytes.length; i++) {
-				packetBytes[i] = kript.decrypt(encryptedBytes[i]);
-			}
-
-			p = new Packet(packetBytes);
-
-			return p;
+			p = (Packet) in.readObject();
 		} catch (IOException e) {
 			throw new ReadPacketException(
 					"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
@@ -271,5 +257,7 @@ public abstract class Connection {
 			throw new ReadPacketException(
 					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
 		}
+
+		return p;
 	}
 }

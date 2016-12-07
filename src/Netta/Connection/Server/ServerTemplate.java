@@ -21,8 +21,14 @@ package Netta.Connection.Server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.security.NoSuchAlgorithmException;
 
+import Kript.Kript;
 import Netta.Connection.Connection;
+import Netta.Connection.Packet;
+import Netta.Exceptions.HandShakeException;
+import Netta.Exceptions.ReadPacketException;
+import Netta.Exceptions.SendPacketException;
 import Netta.Exceptions.ServerInitializeException;
 
 public abstract class ServerTemplate extends Connection implements Runnable {
@@ -31,7 +37,17 @@ public abstract class ServerTemplate extends Connection implements Runnable {
 	protected ServerSocket serverSocket;
 	private int SoTimeoutMilli = 1000;
 
-	public ServerTemplate(int port) {
+	/**
+	 * Basic Server Template. Doesn't favor either Multi client or Single
+	 * client. Abstract, used by Multi/Single Client servers.
+	 * 
+	 * @param port
+	 *            to host the server on.
+	 * @throws NoSuchAlgorithmException
+	 *             when there is an issue creating the RSA keys.
+	 */
+	public ServerTemplate(int port) throws NoSuchAlgorithmException {
+		super(new Kript());
 		this.port = port;
 	}
 
@@ -69,5 +85,47 @@ public abstract class ServerTemplate extends Connection implements Runnable {
 	 */
 	protected void ThreadAction() {
 
+	}
+
+	protected void HandShake() throws HandShakeException {
+		try {
+			@SuppressWarnings("unused")
+			Packet clientHello = ReceiveUnencryptedPacket();
+		} catch (ReadPacketException e) {
+			throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
+		}
+
+		try {
+			Packet serverHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
+			SendUnencryptedPacket(serverHello);
+		} catch (SendPacketException e) {
+			throw new HandShakeException("Unable to send HandShake serverHello to connection. Terminating.");
+		}
+
+		try {
+			Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
+			serverKeyExchange.packetKey = kript.getPublicKey();
+			SendUnencryptedPacket(serverKeyExchange);
+		} catch (SendPacketException e) {
+			throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
+		}
+
+		try {
+			Packet clientKeyExchange = ReceivePacket();
+			kript.setRemotePublicKey(clientKeyExchange.packetKey);
+		} catch (ReadPacketException e) {
+			throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
+		}
+
+		try {
+			Packet clientDone = ReceivePacket();
+			if (clientDone.packetString != "done")
+				throw new HandShakeException(
+						"Unable to decrypt Packet from connection. HandShake failure. Terminating.");
+		} catch (ReadPacketException e) {
+			throw new HandShakeException("Unable to receive HandShake clientDone from connection. Terminating.");
+		}
+
+		System.out.println("HandShake with client complete!");
 	}
 }
