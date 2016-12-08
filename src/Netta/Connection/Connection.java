@@ -19,10 +19,13 @@
 
 package Netta.Connection;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+
+import javax.crypto.SealedObject;
 
 import Kript.Kript;
 import Netta.Exceptions.ConnectionException;
@@ -143,9 +146,8 @@ public abstract class Connection {
 
 		try {
 			byte[] packetBytes = p.ToBytes();
-			byte[] encryptedBytes = new byte[packetBytes.length];
 
-			encryptedBytes = kript.encrypt(packetBytes);
+			SealedObject encryptedBytes = kript.encrypt(packetBytes);
 
 			out.writeObject(encryptedBytes);
 			out.flush();
@@ -154,6 +156,7 @@ public abstract class Connection {
 			throw new SendPacketException("Error sending packet to socket. PacketType: " + p.packetType.toString()
 					+ ". PacketMessage: " + p.packetString);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new SendPacketException(
 					"Error encrypting data to send. Likely an issue with generating the RSA cipher.");
 		}
@@ -179,10 +182,11 @@ public abstract class Connection {
 			return p;
 
 		try {
-			byte[] encryptedBytes = (byte[]) in.readObject();
-			byte[] packetBytes = new byte[encryptedBytes.length];
-
-			packetBytes = kript.decrypt(encryptedBytes);
+//			byte[] encryptedBytes = null;
+//			while (in.available() > 0) {
+			SealedObject encryptedBytes = (SealedObject) in.readObject();
+//			}
+			byte[] packetBytes = kript.decrypt(encryptedBytes);
 
 			p = new Packet(packetBytes);
 
@@ -195,6 +199,7 @@ public abstract class Connection {
 			throw new ReadPacketException(
 					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ReadPacketException("Error decrypting packet. Likely an issue creating the RSA cipher.");
 		}
 	}

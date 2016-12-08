@@ -143,6 +143,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 			clientKeyExchange.packetKey = kript.getPublicKey();
 			SendPacket(clientKeyExchange);
 		} catch (SendPacketException e) {
+			e.printStackTrace();
 			throw new HandShakeException("Unable to send HandShake clientKeyExchange to connection. Terminating.");
 		}
 
