@@ -103,7 +103,7 @@ public class ConnectedClient extends Connection implements Runnable {
 		}
 
 		try {
-			Packet clientKeyExchange = ReceivePacket();
+			Packet clientKeyExchange = ReceiveUnencryptedPacket();
 			kript.setRemotePublicKey(clientKeyExchange.packetKey);
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
@@ -112,7 +112,6 @@ public class ConnectedClient extends Connection implements Runnable {
 		try {
 			Packet clientDone = ReceivePacket();
 			if (!clientDone.packetString.equals("done")) {
-				System.err.println(clientDone.packetString);
 				throw new HandShakeException(
 						"Unable to decrypt PacketString from connection. HandShake failure. Terminating.");
 			}
@@ -120,6 +119,14 @@ public class ConnectedClient extends Connection implements Runnable {
 			throw new HandShakeException("Unable to receive HandShake clientDone from connection. Terminating.");
 		}
 
+		try{
+			Packet serverDone = new Packet(Packet.PACKET_TYPE.Handshake, null);
+			serverDone.packetString = "done";
+			SendPacket(serverDone);
+		}catch(SendPacketException e){
+			throw new HandShakeException("Unable to send HandShake serverDone to connection. Terminating.");
+		}
+		
 		System.out.println("HandShake with client complete!");
 	}
 }

@@ -141,7 +141,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 		try {
 			Packet clientKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
 			clientKeyExchange.packetKey = kript.getPublicKey();
-			SendPacket(clientKeyExchange);
+			SendUnencryptedPacket(clientKeyExchange);
 		} catch (SendPacketException e) {
 			e.printStackTrace();
 			throw new HandShakeException("Unable to send HandShake clientKeyExchange to connection. Terminating.");
@@ -153,6 +153,16 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 			SendPacket(clientDone);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake clientDone to connection. Terminating.");
+		}
+
+		try {
+			Packet serverDone = ReceivePacket();
+			if (!serverDone.packetString.equals("done")) {
+				throw new HandShakeException(
+						"Unable to decrypt PacketString from connection. HandShake failure. Terminating.");
+			}
+		} catch (ReadPacketException e) {
+			throw new HandShakeException("Unable to receive HandShake serverDone from connection. Terminating.");
 		}
 
 		System.out.println("HandShake with server complete!");
