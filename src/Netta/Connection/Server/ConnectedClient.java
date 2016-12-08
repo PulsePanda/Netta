@@ -111,9 +111,11 @@ public class ConnectedClient extends Connection implements Runnable {
 
 		try {
 			Packet clientDone = ReceivePacket();
-			if (clientDone.packetString != "done")
+			if (!clientDone.packetString.equals("done")) {
+				System.err.println(clientDone.packetString);
 				throw new HandShakeException(
-						"Unable to decrypt Packet from connection. HandShake failure. Terminating.");
+						"Unable to decrypt PacketString from connection. HandShake failure. Terminating.");
+			}
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientDone from connection. Terminating.");
 		}

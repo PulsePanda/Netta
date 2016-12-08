@@ -25,8 +25,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import javax.crypto.SealedObject;
-
 import Kript.Kript;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
@@ -145,9 +143,11 @@ public abstract class Connection {
 			return false;
 
 		try {
+			p.prepareForEncryption();
+			
 			byte[] packetBytes = p.ToBytes();
 
-			SealedObject encryptedBytes = kript.encrypt(packetBytes);
+			byte[] encryptedBytes = kript.encrypt(packetBytes);
 
 			out.writeObject(encryptedBytes);
 			out.flush();
@@ -158,7 +158,7 @@ public abstract class Connection {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new SendPacketException(
-					"Error encrypting data to send. Likely an issue with generating the RSA cipher.");
+					"Error encrypting data to send. Possible causes: An issue with generating the RSA cipher; Error encoding strings to byte[]'s;");
 		}
 	}
 
@@ -182,15 +182,20 @@ public abstract class Connection {
 			return p;
 
 		try {
-//			byte[] encryptedBytes = null;
-//			while (in.available() > 0) {
-			SealedObject encryptedBytes = (SealedObject) in.readObject();
-//			}
+			// byte[] encryptedBytes = null;
+			// while (in.available() > 0) {
+			byte[] encryptedBytes = (byte[]) in.readObject();
+			// }
 			byte[] packetBytes = kript.decrypt(encryptedBytes);
 
 			p = new Packet(packetBytes);
 
+			p.postEncryption();
+			
 			return p;
+		} catch (EOFException e) {
+			throw new ReadPacketException(
+					"EOFException thrown. Possible Causes: Server was unable to handshake and closed connection;");
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new ReadPacketException(
@@ -200,7 +205,7 @@ public abstract class Connection {
 					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ReadPacketException("Error decrypting packet. Likely an issue creating the RSA cipher.");
+			throw new ReadPacketException("Error decrypting packet. Possible causes: An issue creating the RSA cipher; An error decoding byte[]'s to strings;");
 		}
 	}
 

@@ -26,8 +26,12 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 
 public class Packet implements Serializable {
 
@@ -35,8 +39,12 @@ public class Packet implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static final char[] DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
+			'f' };
 	public ArrayList<String> gData;
 	public String packetString, senderID;
+	private byte[] stringBytes, idBytes;
+	private char[] stringChar, idChar;
 	public int packetInt;
 	public boolean packetBool;
 	public PublicKey packetKey;
@@ -101,6 +109,81 @@ public class Packet implements Serializable {
 		ObjectOutputStream os = new ObjectOutputStream(bos);
 		os.writeObject(this);
 		return bos.toByteArray();
+	}
+
+	public void prepareForEncryption() throws UnsupportedEncodingException {
+		if (packetString != null) {
+			stringBytes = packetString.getBytes("UTF-8");
+			stringChar = encodeHex(stringBytes);
+			packetString = new String(stringChar);
+			stringChar = null;
+			stringBytes = null;
+		}
+
+		if (senderID != null) {
+			idBytes = packetString.getBytes("UTF-8");
+			idChar = encodeHex(idBytes);
+			senderID = new String(idChar);
+			idChar = null;
+			idBytes = null;
+		}
+	}
+
+	public void postEncryption() throws UnsupportedEncodingException {
+		if (packetString != null) {
+			stringBytes = decodeHex(packetString.toCharArray());
+			packetString = new String(stringBytes, "UTF-8");
+			stringBytes = null;
+			stringChar = null;
+		}
+
+		if (senderID != null) {
+			idBytes = decodeHex(senderID.toCharArray());
+			senderID = new String(idBytes, "UTF-8");
+			idBytes = null;
+			idChar = null;
+		}
+	}
+
+	private char[] encodeHex(byte[] bytes) {
+		int l = bytes.length;
+
+		char[] out = new char[l << 1];
+
+		for (int i = 0, j = 0; i < l; i++) {
+			out[j++] = DIGITS[(0xF0 & bytes[i]) >>> 4];
+			out[j++] = DIGITS[0x0F & bytes[i]];
+		}
+
+		return out;
+	}
+
+	private byte[] decodeHex(char[] data) {
+		int l = data.length;
+
+		if ((l & 0x01) != 0) {
+			System.err.println("THROW!!!!!!!!!!!!!!!! Netta decodeHex if throw");
+		}
+
+		byte[] out = new byte[l >> 1];
+
+		for (int i = 0, j = 0; j < l; i++) {
+			int f = toDigit(data[j], j) << 4;
+			j++;
+			f = f | toDigit(data[j], j);
+			j++;
+			out[i] = (byte) (f & 0xFF);
+		}
+
+		return out;
+	}
+
+	private int toDigit(char ch, int index) {
+		int digit = Character.digit(ch, 16);
+		if (digit == -1) {
+			System.err.println("THROW!!!!!!!!!!!!!!!! Netta toDigit digit == -1");
+		}
+		return digit;
 	}
 
 	public enum PACKET_TYPE {
