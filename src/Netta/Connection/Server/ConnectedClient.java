@@ -103,7 +103,7 @@ public class ConnectedClient extends Connection implements Runnable {
 		}
 
 		try {
-			Packet clientKeyExchange = ReceiveUnencryptedPacket();
+			Packet clientKeyExchange = ReceivePacket();
 			kript.setRemotePublicKey(clientKeyExchange.packetKey);
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");

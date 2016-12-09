@@ -141,7 +141,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 		try {
 			Packet clientKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
 			clientKeyExchange.packetKey = kript.getPublicKey();
-			SendUnencryptedPacket(clientKeyExchange);
+			SendPacket(clientKeyExchange);
 		} catch (SendPacketException e) {
 			e.printStackTrace();
 			throw new HandShakeException("Unable to send HandShake clientKeyExchange to connection. Terminating.");

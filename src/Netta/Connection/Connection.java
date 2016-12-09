@@ -143,8 +143,6 @@ public abstract class Connection {
 			return false;
 
 		try {
-			p.prepareForEncryption();
-			
 			byte[] packetBytes = p.ToBytes();
 
 			byte[] encryptedBytes = kript.encrypt(packetBytes);
@@ -190,8 +188,6 @@ public abstract class Connection {
 
 			p = new Packet(packetBytes);
 
-			p.postEncryption();
-			
 			return p;
 		} catch (EOFException e) {
 			throw new ReadPacketException(
@@ -205,7 +201,8 @@ public abstract class Connection {
 					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ReadPacketException("Error decrypting packet. Possible causes: An issue creating the RSA cipher; An error decoding byte[]'s to strings;");
+			throw new ReadPacketException(
+					"Error decrypting packet. Possible causes: An issue creating the RSA cipher; An error decoding byte[]'s to strings;");
 		}
 	}
 
