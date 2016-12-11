@@ -17,9 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Netta.Exceptions;
+package main.java.Netta.Exceptions;
 
-public class SendPacketException extends Exception {
+public class ConnectionException extends Exception {
 
 	/**
 	 * Thrown if there are issues initializing a network connection of any type.
@@ -27,10 +27,10 @@ public class SendPacketException extends Exception {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public SendPacketException() {
+	public ConnectionException() {
 	}
 
-	public SendPacketException(String message) {
+	public ConnectionException(String message) {
 		super(message);
 	}
 }

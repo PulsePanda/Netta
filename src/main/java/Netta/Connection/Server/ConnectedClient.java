@@ -17,18 +17,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Netta.Connection.Server;
+package main.java.Netta.Connection.Server;
 
 import java.net.Socket;
 
 import Kript.Kript;
-import Netta.Connection.Connection;
-import Netta.Connection.Packet;
-import Netta.Exceptions.ConnectionException;
-import Netta.Exceptions.ConnectionInitializationException;
-import Netta.Exceptions.HandShakeException;
-import Netta.Exceptions.ReadPacketException;
-import Netta.Exceptions.SendPacketException;
+import main.java.Netta.Connection.Connection;
+import main.java.Netta.Connection.Packet;
+import main.java.Netta.Exceptions.ConnectionException;
+import main.java.Netta.Exceptions.ConnectionInitializationException;
+import main.java.Netta.Exceptions.HandShakeException;
+import main.java.Netta.Exceptions.ReadPacketException;
+import main.java.Netta.Exceptions.SendPacketException;
 
 public class ConnectedClient extends Connection implements Runnable {
 

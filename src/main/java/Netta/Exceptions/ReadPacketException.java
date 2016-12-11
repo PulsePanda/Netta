@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Netta.Exceptions;
+package main.java.Netta.Exceptions;
 
 public class ReadPacketException extends Exception {
 

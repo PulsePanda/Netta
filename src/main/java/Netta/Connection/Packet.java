@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Netta.Connection;
+package main.java.Netta.Connection;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Netta.Connection.Server;
+package main.java.Netta.Connection.Server;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -25,7 +25,7 @@ import java.net.SocketTimeoutException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-import Netta.Exceptions.ServerInitializeException;
+import main.java.Netta.Exceptions.ServerInitializeException;
 
 public abstract class MultiClientServer extends ServerTemplate {
 

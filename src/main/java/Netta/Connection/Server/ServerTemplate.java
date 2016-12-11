@@ -17,19 +17,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Netta.Connection.Server;
+package main.java.Netta.Connection.Server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.security.NoSuchAlgorithmException;
 
 import Kript.Kript;
-import Netta.Connection.Connection;
-import Netta.Connection.Packet;
-import Netta.Exceptions.HandShakeException;
-import Netta.Exceptions.ReadPacketException;
-import Netta.Exceptions.SendPacketException;
-import Netta.Exceptions.ServerInitializeException;
+import main.java.Netta.Connection.Connection;
+import main.java.Netta.Connection.Packet;
+import main.java.Netta.Exceptions.HandShakeException;
+import main.java.Netta.Exceptions.ReadPacketException;
+import main.java.Netta.Exceptions.SendPacketException;
+import main.java.Netta.Exceptions.ServerInitializeException;
 
 public abstract class ServerTemplate extends Connection implements Runnable {
 

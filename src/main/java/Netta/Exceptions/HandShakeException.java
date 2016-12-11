@@ -17,19 +17,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Netta.Exceptions;
+package main.java.Netta.Exceptions;
 
-public class ServerInitializeException extends Exception {
+public class HandShakeException extends Exception {
 
 	/**
-	 * 
+	 * Thrown if there are issues handling the connection handshake. Details of the
+	 * error are held within the exception object's message()
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public ServerInitializeException() {
+	public HandShakeException() {
 	}
 
-	public ServerInitializeException(String message) {
+	public HandShakeException(String message) {
 		super(message);
 	}
 }
