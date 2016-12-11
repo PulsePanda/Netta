@@ -1,2 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+
+dependencies {
+	runtime files('libs/Kript.jar')
+	runtime fileTree(dir: 'libs', include: '*.jar')
+}
