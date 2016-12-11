@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'base'
 
 version = '1.1'
 
@@ -18,4 +19,12 @@ task fatJar(type: Jar) {
 	baseName = project.name
 	from {configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}}
 	with jar
+
+	doLast {
+		copy{
+			from 'build/docs/javadoc'
+			into 'docs'
+		}
+	}
 }
+fatJar.dependsOn build
