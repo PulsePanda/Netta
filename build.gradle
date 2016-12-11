@@ -7,6 +7,10 @@ dependencies {
 	compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
+jar {
+	//include('lib/Kript.jar')
+}
+
 task fatJar(type: Jar) {
 	manifest {
 		attributes 'Implementation-Title': 'Netta', 'Implementation-Version': version
