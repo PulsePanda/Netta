@@ -17,18 +17,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main.java.Netta.Connection.Server;
+package Netta.Connection.Server;
 
 import java.net.Socket;
 
 import Kript.Kript;
-import main.java.Netta.Connection.Connection;
-import main.java.Netta.Connection.Packet;
-import main.java.Netta.Exceptions.ConnectionException;
-import main.java.Netta.Exceptions.ConnectionInitializationException;
-import main.java.Netta.Exceptions.HandShakeException;
-import main.java.Netta.Exceptions.ReadPacketException;
-import main.java.Netta.Exceptions.SendPacketException;
+import Netta.Connection.Connection;
+import Netta.Connection.Packet;
+import Netta.Exceptions.ConnectionException;
+import Netta.Exceptions.ConnectionInitializationException;
+import Netta.Exceptions.HandShakeException;
+import Netta.Exceptions.ReadPacketException;
+import Netta.Exceptions.SendPacketException;
 
 public class ConnectedClient extends Connection implements Runnable {
 
@@ -119,14 +119,14 @@ public class ConnectedClient extends Connection implements Runnable {
 			throw new HandShakeException("Unable to receive HandShake clientDone from connection. Terminating.");
 		}
 
-		try{
+		try {
 			Packet serverDone = new Packet(Packet.PACKET_TYPE.Handshake, null);
 			serverDone.packetString = "done";
 			SendPacket(serverDone);
-		}catch(SendPacketException e){
+		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverDone to connection. Terminating.");
 		}
-		
+
 		System.out.println("HandShake with client complete!");
 	}
 }

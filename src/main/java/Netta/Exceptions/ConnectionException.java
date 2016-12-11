@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main.java.Netta.Exceptions;
+package Netta.Exceptions;
 
 public class ConnectionException extends Exception {
 

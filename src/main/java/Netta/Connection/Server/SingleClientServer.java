@@ -17,18 +17,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main.java.Netta.Connection.Server;
+package Netta.Connection.Server;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.security.NoSuchAlgorithmException;
 
-import main.java.Netta.Connection.Packet;
-import main.java.Netta.Exceptions.ConnectionException;
-import main.java.Netta.Exceptions.ConnectionInitializationException;
-import main.java.Netta.Exceptions.HandShakeException;
-import main.java.Netta.Exceptions.ReadPacketException;
-import main.java.Netta.Exceptions.ServerInitializeException;
+import Netta.Connection.Packet;
+import Netta.Exceptions.ConnectionException;
+import Netta.Exceptions.ConnectionInitializationException;
+import Netta.Exceptions.HandShakeException;
+import Netta.Exceptions.ReadPacketException;
+import Netta.Exceptions.ServerInitializeException;
 
 public abstract class SingleClientServer extends ServerTemplate {
 

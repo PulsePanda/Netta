@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main.java.Netta.Connection;
+package Netta.Connection;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -26,10 +26,10 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import Kript.Kript;
-import main.java.Netta.Exceptions.ConnectionException;
-import main.java.Netta.Exceptions.ConnectionInitializationException;
-import main.java.Netta.Exceptions.ReadPacketException;
-import main.java.Netta.Exceptions.SendPacketException;
+import Netta.Exceptions.ConnectionException;
+import Netta.Exceptions.ConnectionInitializationException;
+import Netta.Exceptions.ReadPacketException;
+import Netta.Exceptions.SendPacketException;
 
 public abstract class Connection {
 	private boolean connectionActive = false;

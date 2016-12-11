@@ -17,13 +17,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main.java.Netta.Exceptions;
+package Netta.Exceptions;
 
 public class HandShakeException extends Exception {
 
 	/**
-	 * Thrown if there are issues handling the connection handshake. Details of the
-	 * error are held within the exception object's message()
+	 * Thrown if there are issues handling the connection handshake. Details of
+	 * the error are held within the exception object's message()
 	 */
 	private static final long serialVersionUID = 1L;
 
