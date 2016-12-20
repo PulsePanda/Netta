@@ -32,6 +32,23 @@ import Netta.Exceptions.SendPacketException;
 
 public class ConnectedClient extends Connection implements Runnable {
 
+	private boolean handshakeComplete = false;
+
+	/**
+	 * ConnectedClient is designed to be used to handle each client on a server
+	 * that has connected with a MultiClientServer. The server's ThreadAction
+	 * accepts a ConnectedClient object. This is when you take control over what
+	 * client will be able to do.
+	 * 
+	 * @param socket
+	 *            connection received by the server.
+	 * @param kript
+	 *            object being used by the server. Either create a new one per
+	 *            connection, or have the same for all connections.
+	 * @throws ConnectionInitializationException
+	 *             thrown if there is an error initializing the client. Details
+	 *             will be in getMessage().
+	 */
 	public ConnectedClient(Socket socket, Kript kript) throws ConnectionInitializationException {
 		super(kript);
 		connectedSocket = socket;
@@ -65,6 +82,12 @@ public class ConnectedClient extends Connection implements Runnable {
 		}
 	}
 
+	/**
+	 * Called every time the server receives a packet from a connected client.
+	 * 
+	 * @param p
+	 *            packet received by client.
+	 */
 	public void ThreadAction(Packet p) {
 		if (p.packetType == Packet.PACKET_TYPE.Message)
 			System.out.println(p.packetString);
@@ -79,7 +102,21 @@ public class ConnectedClient extends Connection implements Runnable {
 		}
 	}
 
+	/**
+	 * Handshake helper method to initialize connection with Server. This method
+	 * is called by the constructor to initialize the HandShake with the client.
+	 * After the HandShake is successful, this method will be unable to be
+	 * called again for this connection. If called, a HandShakeException will be
+	 * thrown.
+	 * 
+	 * @throws HandShakeException
+	 *             thrown if the handshake is unsuccessful. Details in
+	 *             getMessage().
+	 */
 	protected void HandShake() throws HandShakeException {
+		if (handshakeComplete)
+			throw new HandShakeException("Unable to HandShake with client. HandShake has already been completed.");
+
 		try {
 			@SuppressWarnings("unused")
 			Packet clientHello = ReceiveUnencryptedPacket();
@@ -127,6 +164,7 @@ public class ConnectedClient extends Connection implements Runnable {
 			throw new HandShakeException("Unable to send HandShake serverDone to connection. Terminating.");
 		}
 
+		handshakeComplete = true;
 		System.out.println("HandShake with client complete!");
 	}
 }

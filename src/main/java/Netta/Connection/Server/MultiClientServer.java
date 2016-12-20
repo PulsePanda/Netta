@@ -122,7 +122,7 @@ public abstract class MultiClientServer extends ServerTemplate {
 	/**
 	 * Retreive the ArrayList of connected clients.
 	 * 
-	 * @return ArrayList<ConnectedClient> containing all clients that are
+	 * @return ArrayList containing all ConnectedClient objects that are
 	 *         connected.
 	 */
 	protected ArrayList<ConnectedClient> GetConnectedClients() {

@@ -28,3 +28,4 @@ task fatJar(type: Jar) {
 	}
 }
 fatJar.dependsOn build
+build.dependsOn javadoc

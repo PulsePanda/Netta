@@ -46,9 +46,6 @@ public abstract class SingleClientServer extends ServerTemplate {
 	 *            the server must host on
 	 * @throws NoSuchAlgorithmException
 	 *             when there is an issue creating the RSA cipher.
-	 * @throws ServerInitializeException
-	 *             if there is an error creating the server for any reason.
-	 *             Details are in the exceptions message.
 	 */
 	public SingleClientServer(int port) throws NoSuchAlgorithmException {
 		super(port);
