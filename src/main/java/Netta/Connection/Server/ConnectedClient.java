@@ -109,7 +109,7 @@ public class ConnectedClient extends Connection implements Runnable {
 	 * 
 	 * @return boolean if true the data is going to be decrypted
 	 */
-	protected boolean getPacketEncrypted() {
+	public boolean getPacketEncrypted() {
 		return encryptedPacket;
 	}
 
@@ -120,7 +120,7 @@ public class ConnectedClient extends Connection implements Runnable {
 	 * @param encrypted
 	 *            boolean. True will have Netta try to decrypt each packet.
 	 */
-	protected void setPacketEncrypted(boolean encrypted) {
+	public void setPacketEncrypted(boolean encrypted) {
 		encryptedPacket = encrypted;
 	}
 
