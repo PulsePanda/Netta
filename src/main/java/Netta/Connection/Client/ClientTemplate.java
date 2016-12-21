@@ -36,6 +36,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 
 	protected String serverIP;
 	protected int port;
+	private boolean encryptedPacket = true;
 
 	/**
 	 * Basic client setup. By default to initialize this object, simply create
@@ -92,7 +93,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 
 		while (IsConnectionActive()) {
 			try {
-				Packet p = ReceivePacket(true);
+				Packet p = ReceivePacket(encryptedPacket);
 				ThreadAction(p);
 			} catch (ReadPacketException e) {
 				System.err.println(e.getMessage() + " Closing connection.");
@@ -112,6 +113,27 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 
 	protected void ThreadAction(Packet p) {
 
+	}
+
+	/**
+	 * Returns the value of EncryptedPacket. This value is what determines
+	 * whether the ReadPacket method will try to decrypt the data.
+	 * 
+	 * @return boolean if true the data is going to be decrypted
+	 */
+	protected boolean getPacketEncrypted() {
+		return encryptedPacket;
+	}
+
+	/**
+	 * Sets the EncryptedPacket variable. Determines whether incoming packets
+	 * are going to need to be decrypted.
+	 * 
+	 * @param encrypted
+	 *            boolean. True will have Netta try to decrypt each packet.
+	 */
+	protected void setPacketEncrypted(boolean encrypted) {
+		encryptedPacket = encrypted;
 	}
 
 	protected void HandShake() throws HandShakeException {
