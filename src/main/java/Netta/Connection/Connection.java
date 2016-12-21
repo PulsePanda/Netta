@@ -131,6 +131,9 @@ public abstract class Connection {
 	 * @param p
 	 *            packet being sent to the socket connection
 	 * 
+	 * @param encrypted
+	 *            boolean value, whether the packet will be encrypted or not
+	 * 
 	 * @return boolean value based on the success of the send. True if object
 	 *         sent successfully, else false.
 	 * 
@@ -138,25 +141,36 @@ public abstract class Connection {
 	 *             thrown when there is an error creating or sending a packet to
 	 *             the socket. Details in the exception object's message()
 	 */
-	public boolean SendPacket(Packet p) throws SendPacketException {
+	public boolean SendPacket(Packet p, boolean encrypted) throws SendPacketException {
 		if (!connectionActive)
 			return false;
 
-		try {
-			byte[] packetBytes = p.ToBytes();
+		if (encrypted) {
+			try {
+				byte[] packetBytes = p.ToBytes();
 
-			byte[] encryptedBytes = kript.encrypt(packetBytes);
+				byte[] encryptedBytes = kript.encrypt(packetBytes);
 
-			out.writeObject(encryptedBytes);
-			out.flush();
-			return true;
-		} catch (IOException e) {
-			throw new SendPacketException("Error sending packet to socket. PacketType: " + p.packetType.toString()
-					+ ". PacketMessage: " + p.packetString);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SendPacketException(
-					"Error encrypting data to send. Possible causes: An issue with generating the RSA cipher; Error encoding strings to byte[]'s;");
+				out.writeObject(encryptedBytes);
+				out.flush();
+				return true;
+			} catch (IOException e) {
+				throw new SendPacketException("Error sending packet to socket. PacketType: " + p.packetType.toString()
+						+ ". PacketMessage: " + p.packetString);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new SendPacketException(
+						"Error encrypting data to send. Possible causes: An issue with generating the RSA cipher; Error encoding strings to byte[]'s;");
+			}
+		} else {
+			try {
+				out.writeObject(p);
+				out.flush();
+				return true;
+			} catch (IOException e) {
+				throw new SendPacketException("Error sending packet to socket. PacketType: " + p.packetType.toString()
+						+ ". PacketMessage: " + p.packetString);
+			}
 		}
 	}
 
@@ -166,6 +180,9 @@ public abstract class Connection {
 	 * DIRECTLY, there is no byte conversion. This function cannot be called if
 	 * the connection is not active.
 	 * 
+	 * @param encrypted
+	 *            boolean value, whether the packet will be encrypted or not
+	 * 
 	 * @return packet from the sockets input stream. If there is an error or
 	 *         anything else goes wrong, returns Packet.PACKET_TYPE.NULL packet
 	 * 
@@ -173,37 +190,44 @@ public abstract class Connection {
 	 *             thrown when there is an error reading a packet from the
 	 *             socket. Details in the exception object's message()
 	 */
-	public Packet ReceivePacket() throws ReadPacketException {
+	public Packet ReceivePacket(boolean encrypted) throws ReadPacketException {
 		Packet p = new Packet(Packet.PACKET_TYPE.NULL, "");
 
 		if (!connectionActive)
 			return p;
 
-		try {
-			// byte[] encryptedBytes = null;
-			// while (in.available() > 0) {
-			byte[] encryptedBytes = (byte[]) in.readObject();
-			// }
-			byte[] packetBytes = kript.decrypt(encryptedBytes);
-
-			p = new Packet(packetBytes);
-
-			return p;
-		} catch (EOFException e) {
-			throw new ReadPacketException(
-					"EOFException thrown. Possible Causes: Server was unable to handshake and closed connection;");
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new ReadPacketException(
-					"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
-		} catch (ClassNotFoundException e) {
-			throw new ReadPacketException(
-					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ReadPacketException(
-					"Error decrypting packet. Possible causes: An issue creating the RSA cipher; An error decoding byte[]'s to strings;");
+		if (encrypted) {
+			try {
+				byte[] encryptedBytes = (byte[]) in.readObject();
+				byte[] packetBytes = kript.decrypt(encryptedBytes);
+				p = new Packet(packetBytes);
+			} catch (EOFException e) {
+				throw new ReadPacketException(
+						"EOFException thrown. Possible Causes: Server was unable to handshake and closed connection;");
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new ReadPacketException(
+						"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
+			} catch (ClassNotFoundException e) {
+				throw new ReadPacketException(
+						"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new ReadPacketException(
+						"Error decrypting packet. Possible causes: An issue creating the RSA cipher; An error decoding byte[]'s to strings;");
+			}
+		} else {
+			try {
+				p = (Packet) in.readObject();
+			} catch (IOException e) {
+				throw new ReadPacketException(
+						"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
+			} catch (ClassNotFoundException e) {
+				throw new ReadPacketException(
+						"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
+			}
 		}
+		return p;
 	}
 
 	/**
@@ -222,19 +246,21 @@ public abstract class Connection {
 	 *             thrown when there is an error sending a packet to the socket.
 	 *             Details in the exception object's message()
 	 */
-	public boolean SendUnencryptedPacket(Packet p) throws SendPacketException {
-		if (!connectionActive)
-			return false;
-
-		try {
-			out.writeObject(p);
-			out.flush();
-			return true;
-		} catch (IOException e) {
-			throw new SendPacketException("Error sending packet to socket. PacketType: " + p.packetType.toString()
-					+ ". PacketMessage: " + p.packetString);
-		}
-	}
+	// public boolean SendUnencryptedPacket(Packet p) throws SendPacketException
+	// {
+	// if (!connectionActive)
+	// return false;
+	//
+	// try {
+	// out.writeObject(p);
+	// out.flush();
+	// return true;
+	// } catch (IOException e) {
+	// throw new SendPacketException("Error sending packet to socket.
+	// PacketType: " + p.packetType.toString()
+	// + ". PacketMessage: " + p.packetString);
+	// }
+	// }
 
 	/**
 	 * Read Packet. This method reads a packet from the connected sockets input
@@ -249,22 +275,24 @@ public abstract class Connection {
 	 *             thrown when there is an error reading a packet from the
 	 *             socket. Details in the exception object's message()
 	 */
-	public Packet ReceiveUnencryptedPacket() throws ReadPacketException {
-		Packet p = new Packet(Packet.PACKET_TYPE.NULL, "");
-
-		if (!connectionActive)
-			return p;
-
-		try {
-			p = (Packet) in.readObject();
-		} catch (IOException e) {
-			throw new ReadPacketException(
-					"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
-		} catch (ClassNotFoundException e) {
-			throw new ReadPacketException(
-					"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
-		}
-
-		return p;
-	}
+	// public Packet ReceiveUnencryptedPacket() throws ReadPacketException {
+	// Packet p = new Packet(Packet.PACKET_TYPE.NULL, "");
+	//
+	// if (!connectionActive)
+	// return p;
+	//
+	// try {
+	// p = (Packet) in.readObject();
+	// } catch (IOException e) {
+	// throw new ReadPacketException(
+	// "Error reading the received data. Possible causes: Wrong Object Type;
+	// Incomplete Send;");
+	// } catch (ClassNotFoundException e) {
+	// throw new ReadPacketException(
+	// "Unable to find class Packet when reading in the data from the socket
+	// stream! Fatal Error.");
+	// }
+	//
+	// return p;
+	// }
 }

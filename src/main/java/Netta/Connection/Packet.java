@@ -41,6 +41,7 @@ public class Packet implements Serializable {
 	public boolean packetBool;
 	public PublicKey packetKey;
 	public PACKET_TYPE packetType;
+	public byte[] packetByteArray;
 
 	/**
 	 * Default Constructor. Used to create a new packet for sending.
@@ -86,6 +87,7 @@ public class Packet implements Serializable {
 		this.packetType = p.packetType;
 		this.packetString = p.packetString;
 		this.packetKey = p.packetKey;
+		this.packetByteArray = p.packetByteArray;
 	}
 
 	/**

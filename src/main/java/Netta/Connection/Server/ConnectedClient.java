@@ -33,6 +33,7 @@ import Netta.Exceptions.SendPacketException;
 public class ConnectedClient extends Connection implements Runnable {
 
 	private boolean handshakeComplete = false;
+	private boolean encryptedPacket = true;
 
 	/**
 	 * ConnectedClient is designed to be used to handle each client on a server
@@ -70,7 +71,7 @@ public class ConnectedClient extends Connection implements Runnable {
 	public void run() {
 		while (IsConnectionActive()) {
 			try {
-				ThreadAction(ReceivePacket());
+				ThreadAction(ReceivePacket(encryptedPacket));
 			} catch (ReadPacketException e) {
 				System.err.println(e.getMessage() + " Closing connection.");
 				try {
@@ -103,6 +104,27 @@ public class ConnectedClient extends Connection implements Runnable {
 	}
 
 	/**
+	 * Returns the value of EncryptedPacket. This value is what determines
+	 * whether the ReadPacket method will try to decrypt the data.
+	 * 
+	 * @return boolean if true the data is going to be decrypted
+	 */
+	protected boolean getPacketEncrypted() {
+		return encryptedPacket;
+	}
+
+	/**
+	 * Sets the EncryptedPacket variable. Determines whether incoming packets
+	 * are going to need to be decrypted.
+	 * 
+	 * @param encrypted
+	 *            boolean. True will have Netta try to decrypt each packet.
+	 */
+	protected void setPacketEncrypted(boolean encrypted) {
+		encryptedPacket = encrypted;
+	}
+
+	/**
 	 * Handshake helper method to initialize connection with Server. This method
 	 * is called by the constructor to initialize the HandShake with the client.
 	 * After the HandShake is successful, this method will be unable to be
@@ -119,14 +141,14 @@ public class ConnectedClient extends Connection implements Runnable {
 
 		try {
 			@SuppressWarnings("unused")
-			Packet clientHello = ReceiveUnencryptedPacket();
+			Packet clientHello = ReceivePacket(false);
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
 		}
 
 		try {
 			Packet serverHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
-			SendUnencryptedPacket(serverHello);
+			SendPacket(serverHello, false);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverHello to connection. Terminating.");
 		}
@@ -134,20 +156,20 @@ public class ConnectedClient extends Connection implements Runnable {
 		try {
 			Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
 			serverKeyExchange.packetKey = kript.getPublicKey();
-			SendUnencryptedPacket(serverKeyExchange);
+			SendPacket(serverKeyExchange, false);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
 		}
 
 		try {
-			Packet clientKeyExchange = ReceivePacket();
+			Packet clientKeyExchange = ReceivePacket(true);
 			kript.setRemotePublicKey(clientKeyExchange.packetKey);
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
 		}
 
 		try {
-			Packet clientDone = ReceivePacket();
+			Packet clientDone = ReceivePacket(true);
 			if (!clientDone.packetString.equals("done")) {
 				throw new HandShakeException(
 						"Unable to decrypt PacketString from connection. HandShake failure. Terminating.");
@@ -159,7 +181,7 @@ public class ConnectedClient extends Connection implements Runnable {
 		try {
 			Packet serverDone = new Packet(Packet.PACKET_TYPE.Handshake, null);
 			serverDone.packetString = "done";
-			SendPacket(serverDone);
+			SendPacket(serverDone, true);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverDone to connection. Terminating.");
 		}

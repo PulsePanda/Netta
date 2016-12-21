@@ -33,6 +33,7 @@ import Netta.Exceptions.ServerInitializeException;
 public abstract class SingleClientServer extends ServerTemplate {
 
 	private boolean threadActive = false;
+	private boolean encryptedPacket = true;
 
 	/**
 	 * Single Client Server. To start the server, simply create a new thread
@@ -87,7 +88,7 @@ public abstract class SingleClientServer extends ServerTemplate {
 
 			while (IsConnectionActive()) {
 				try {
-					ThreadAction(ReceivePacket());
+					ThreadAction(ReceivePacket(encryptedPacket));
 				} catch (ReadPacketException e) {
 					System.err.println(e.getMessage() + " Closing connection.");
 					try {
@@ -105,5 +106,26 @@ public abstract class SingleClientServer extends ServerTemplate {
 	 */
 	protected void ThreadAction(Packet p) {
 
+	}
+
+	/**
+	 * Returns the value of EncryptedPacket. This value is what determines
+	 * whether the ReadPacket method will try to decrypt the data.
+	 * 
+	 * @return boolean if true the data is going to be decrypted
+	 */
+	protected boolean getPacketEncrypted() {
+		return encryptedPacket;
+	}
+
+	/**
+	 * Sets the EncryptedPacket variable. Determines whether incoming packets
+	 * are going to need to be decrypted.
+	 * 
+	 * @param encrypted
+	 *            boolean. True will have Netta try to decrypt each packet.
+	 */
+	protected void setPacketEncrypted(boolean encrypted) {
+		encryptedPacket = encrypted;
 	}
 }

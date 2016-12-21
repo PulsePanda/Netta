@@ -90,14 +90,14 @@ public abstract class ServerTemplate extends Connection implements Runnable {
 	protected void HandShake() throws HandShakeException {
 		try {
 			@SuppressWarnings("unused")
-			Packet clientHello = ReceiveUnencryptedPacket();
+			Packet clientHello = ReceivePacket(false);
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
 		}
 
 		try {
 			Packet serverHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
-			SendUnencryptedPacket(serverHello);
+			SendPacket(serverHello, false);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverHello to connection. Terminating.");
 		}
@@ -105,20 +105,20 @@ public abstract class ServerTemplate extends Connection implements Runnable {
 		try {
 			Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
 			serverKeyExchange.packetKey = kript.getPublicKey();
-			SendUnencryptedPacket(serverKeyExchange);
+			SendPacket(serverKeyExchange, false);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
 		}
 
 		try {
-			Packet clientKeyExchange = ReceivePacket();
+			Packet clientKeyExchange = ReceivePacket(true);
 			kript.setRemotePublicKey(clientKeyExchange.packetKey);
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
 		}
 
 		try {
-			Packet clientDone = ReceivePacket();
+			Packet clientDone = ReceivePacket(true);
 			if (clientDone.packetString != "done")
 				throw new HandShakeException(
 						"Unable to decrypt Packet from connection. HandShake failure. Terminating.");
