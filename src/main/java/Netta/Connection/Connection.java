@@ -211,7 +211,6 @@ public abstract class Connection {
 				throw new ReadPacketException(
 						"Unable to find class Packet when reading in the data from the socket stream! Fatal Error.");
 			} catch (Exception e) {
-				e.printStackTrace();
 				throw new ReadPacketException(
 						"Error decrypting packet. Possible causes: An issue creating the RSA cipher; An error decoding byte[]'s to strings;");
 			}
