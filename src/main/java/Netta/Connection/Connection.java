@@ -205,7 +205,6 @@ public abstract class Connection {
 				throw new ReadPacketException(
 						"EOFException thrown. Possible Causes: Server was unable to handshake and closed connection;");
 			} catch (IOException e) {
-				e.printStackTrace();
 				throw new ReadPacketException(
 						"Error reading the received data. Possible causes: Wrong Object Type; Incomplete Send;");
 			} catch (ClassNotFoundException e) {
