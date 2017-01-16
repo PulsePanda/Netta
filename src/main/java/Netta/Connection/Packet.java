@@ -37,6 +37,7 @@ public class Packet implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public ArrayList<String> gData;
 	public String packetString, senderID;
+	public String[] packetStringArray;
 	public int packetInt;
 	public boolean packetBool;
 	public PublicKey packetKey;
@@ -88,6 +89,7 @@ public class Packet implements Serializable {
 		this.packetString = p.packetString;
 		this.packetKey = p.packetKey;
 		this.packetByteArray = p.packetByteArray;
+		this.packetStringArray = p.packetStringArray;
 	}
 
 	/**
