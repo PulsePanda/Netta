@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/PulsePanda/Netta.svg?branch=master)](https://travis-ci.org/PulsePanda/Netta)
+
 # Netta
 
 Built in Java, Netta allows easy access to client and server objects. With a couple lines of code, Netta will build and deploy a fully functional and completely customizable multi-client server, single client server, and client.
