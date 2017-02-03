@@ -7,6 +7,7 @@
 /.gradle/
 /build/
 .metadata
+.idea/
 bin/
 tmp/
 *.tmp
