@@ -19,17 +19,17 @@
 
 package Netta.Connection;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-
 import Kript.Kript;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.ReadPacketException;
 import Netta.Exceptions.SendPacketException;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
 public abstract class Connection {
 	private boolean connectionActive = false;
@@ -51,11 +51,11 @@ public abstract class Connection {
 	 *             if there is an error creating client input and/or output
 	 *             streams
 	 */
-	public void OpenIOStreams() throws ConnectionInitializationException {
+	public void openIOStreams() throws ConnectionInitializationException {
 		if (connectionActive)
 			throw new ConnectionInitializationException(
-					"Connection is already active. Cannot OpenIOStreams on an active connection.");
-		if (!connectedSocket.isConnected() || connectedSocket == null)
+					"Connection is already active. Cannot openIOStreams on an active connection.");
+		if (connectedSocket == null || !connectedSocket.isConnected())
 			throw new ConnectionInitializationException(
 					"Socket is listed as not-connected. Cannot open streams on a disconnected socket.");
 
@@ -86,7 +86,7 @@ public abstract class Connection {
 	 *             connected socket. Details are in the exception object's
 	 *             message(). If an error is thrown, force close the connection.
 	 */
-	public void CloseIOStreams() throws ConnectionException {
+	public void closeIOStreams() throws ConnectionException {
 		if (!connectionActive)
 			throw new ConnectionException("Connection is already closed. Cannot close a closed connection.");
 
@@ -118,7 +118,7 @@ public abstract class Connection {
 	 * 
 	 * @return True if the connection is still active, else false;
 	 */
-	public boolean IsConnectionActive() {
+	public boolean isConnectionActive() {
 		return connectionActive;
 	}
 
@@ -141,7 +141,7 @@ public abstract class Connection {
 	 *             thrown when there is an error creating or sending a packet to
 	 *             the socket. Details in the exception object's message()
 	 */
-	public boolean SendPacket(Packet p, boolean encrypted) throws SendPacketException {
+	public boolean sendPacket(Packet p, boolean encrypted) throws SendPacketException {
 		if (!connectionActive)
 			return false;
 
@@ -190,7 +190,7 @@ public abstract class Connection {
 	 *             thrown when there is an error reading a packet from the
 	 *             socket. Details in the exception object's message()
 	 */
-	public Packet ReceivePacket(boolean encrypted) throws ReadPacketException {
+	public Packet receivePacket(boolean encrypted) throws ReadPacketException {
 		Packet p = new Packet(Packet.PACKET_TYPE.NULL, "");
 
 		if (!connectionActive)
@@ -227,70 +227,4 @@ public abstract class Connection {
 		}
 		return p;
 	}
-
-	/**
-	 * Send Packet. This method sends a packet p to the connected socket. It is
-	 * important to note that this send is NOT converted to bytes, it is only
-	 * sent as a packet. This function cannot be called if the connection is not
-	 * active.
-	 * 
-	 * @param p
-	 *            packet being sent to the socket connection
-	 * 
-	 * @return boolean value based on the success of the send. True if object
-	 *         sent successfully, else false.
-	 * 
-	 * @throws SendPacketException
-	 *             thrown when there is an error sending a packet to the socket.
-	 *             Details in the exception object's message()
-	 */
-	// public boolean SendUnencryptedPacket(Packet p) throws SendPacketException
-	// {
-	// if (!connectionActive)
-	// return false;
-	//
-	// try {
-	// out.writeObject(p);
-	// out.flush();
-	// return true;
-	// } catch (IOException e) {
-	// throw new SendPacketException("Error sending packet to socket.
-	// PacketType: " + p.packetType.toString()
-	// + ". PacketMessage: " + p.packetString);
-	// }
-	// }
-
-	/**
-	 * Read Packet. This method reads a packet from the connected sockets input
-	 * stream. It is important to note, this method reads the Packet object
-	 * DIRECTLY, there is no byte conversion. This function cannot be called if
-	 * the connection is not active.
-	 * 
-	 * @return packet from the sockets input stream. If there is an error or
-	 *         anything else goes wrong, returns Packet.PACKET_TYPE.NULL packet
-	 * 
-	 * @throws ReadPacketException
-	 *             thrown when there is an error reading a packet from the
-	 *             socket. Details in the exception object's message()
-	 */
-	// public Packet ReceiveUnencryptedPacket() throws ReadPacketException {
-	// Packet p = new Packet(Packet.PACKET_TYPE.NULL, "");
-	//
-	// if (!connectionActive)
-	// return p;
-	//
-	// try {
-	// p = (Packet) in.readObject();
-	// } catch (IOException e) {
-	// throw new ReadPacketException(
-	// "Error reading the received data. Possible causes: Wrong Object Type;
-	// Incomplete Send;");
-	// } catch (ClassNotFoundException e) {
-	// throw new ReadPacketException(
-	// "Unable to find class Packet when reading in the data from the socket
-	// stream! Fatal Error.");
-	// }
-	//
-	// return p;
-	// }
 }

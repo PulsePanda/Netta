@@ -19,16 +19,12 @@
 
 package Netta.Connection.Server;
 
+import Netta.Connection.Packet;
+import Netta.Exceptions.*;
+
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.security.NoSuchAlgorithmException;
-
-import Netta.Connection.Packet;
-import Netta.Exceptions.ConnectionException;
-import Netta.Exceptions.ConnectionInitializationException;
-import Netta.Exceptions.HandShakeException;
-import Netta.Exceptions.ReadPacketException;
-import Netta.Exceptions.ServerInitializeException;
 
 public abstract class SingleClientServer extends ServerTemplate {
 
@@ -53,12 +49,12 @@ public abstract class SingleClientServer extends ServerTemplate {
 	}
 
 	public void run() {
-		if (IsConnectionActive()) {
+		if (isConnectionActive()) {
 			System.err.println("Cannot initialize server. Server is already running: " + serverSocket);
 			return;
 		}
 
-		System.out.println("Initializing singleclient server...");
+		System.out.println("Initializing single-client server...");
 		try {
 			Init();
 			System.out.println("Server Initialized.");
@@ -73,7 +69,7 @@ public abstract class SingleClientServer extends ServerTemplate {
 		while (threadActive) {
 			try {
 				connectedSocket = serverSocket.accept();
-				OpenIOStreams();
+				openIOStreams();
 				System.out.println("Client connection caught and initialized. Client: " + connectedSocket);
 				System.out.println("Connection with " + connectedSocket + " now listening for incoming packets.");
 				HandShake();
@@ -86,13 +82,13 @@ public abstract class SingleClientServer extends ServerTemplate {
 				System.err.println(e.getMessage());
 			}
 
-			while (IsConnectionActive()) {
+			while (isConnectionActive()) {
 				try {
-					ThreadAction(ReceivePacket(encryptedPacket));
+					ThreadAction(receivePacket(encryptedPacket));
 				} catch (ReadPacketException e) {
 					System.err.println(e.getMessage() + " Closing connection.");
 					try {
-						CloseIOStreams();
+						closeIOStreams();
 					} catch (ConnectionException e1) {
 						System.err.println(e.getMessage());
 					}
