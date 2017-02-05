@@ -19,16 +19,12 @@
 
 package Netta.Connection.Server;
 
-import java.net.Socket;
-
 import Kript.Kript;
 import Netta.Connection.Connection;
 import Netta.Connection.Packet;
-import Netta.Exceptions.ConnectionException;
-import Netta.Exceptions.ConnectionInitializationException;
-import Netta.Exceptions.HandShakeException;
-import Netta.Exceptions.ReadPacketException;
-import Netta.Exceptions.SendPacketException;
+import Netta.Exceptions.*;
+
+import java.net.Socket;
 
 public class ConnectedClient extends Connection implements Runnable {
 
@@ -53,13 +49,13 @@ public class ConnectedClient extends Connection implements Runnable {
 	public ConnectedClient(Socket socket, Kript kript) throws ConnectionInitializationException {
 		super(kript);
 		connectedSocket = socket;
-		OpenIOStreams();
+		openIOStreams();
 		try {
 			HandShake();
 		} catch (HandShakeException e) {
 			System.err.println(e.getMessage());
 			try {
-				CloseIOStreams();
+				closeIOStreams();
 			} catch (ConnectionException e1) {
 				System.err.println(e1.getMessage());
 			}
@@ -69,13 +65,13 @@ public class ConnectedClient extends Connection implements Runnable {
 
 	@Override
 	public void run() {
-		while (IsConnectionActive()) {
+		while (isConnectionActive()) {
 			try {
-				ThreadAction(ReceivePacket(encryptedPacket));
+				ThreadAction(receivePacket(encryptedPacket));
 			} catch (ReadPacketException e) {
 				System.err.println(e.getMessage() + " Closing connection.");
 				try {
-					CloseIOStreams();
+					closeIOStreams();
 				} catch (ConnectionException e1) {
 					System.err.println(e.getMessage());
 				}
@@ -95,7 +91,7 @@ public class ConnectedClient extends Connection implements Runnable {
 		else if (p.packetType == Packet.PACKET_TYPE.CloseConnection) {
 			System.out.println("Client wishes to close connection. Closing.");
 			try {
-				CloseIOStreams();
+				closeIOStreams();
 			} catch (ConnectionException e) {
 				System.err.println(e.getMessage());
 			}
@@ -141,14 +137,14 @@ public class ConnectedClient extends Connection implements Runnable {
 
 		try {
 			@SuppressWarnings("unused")
-			Packet clientHello = ReceivePacket(false);
+			Packet clientHello = receivePacket(false);
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
 		}
 
 		try {
 			Packet serverHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
-			SendPacket(serverHello, false);
+			sendPacket(serverHello, false);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverHello to connection. Terminating.");
 		}
@@ -156,20 +152,20 @@ public class ConnectedClient extends Connection implements Runnable {
 		try {
 			Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
 			serverKeyExchange.packetKey = kript.getPublicKey();
-			SendPacket(serverKeyExchange, false);
+			sendPacket(serverKeyExchange, false);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
 		}
 
 		try {
-			Packet clientKeyExchange = ReceivePacket(true);
+			Packet clientKeyExchange = receivePacket(true);
 			kript.setRemotePublicKey(clientKeyExchange.packetKey);
 		} catch (ReadPacketException e) {
 			throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
 		}
 
 		try {
-			Packet clientDone = ReceivePacket(true);
+			Packet clientDone = receivePacket(true);
 			if (!clientDone.packetString.equals("done")) {
 				throw new HandShakeException(
 						"Unable to decrypt PacketString from connection. HandShake failure. Terminating.");
@@ -181,7 +177,7 @@ public class ConnectedClient extends Connection implements Runnable {
 		try {
 			Packet serverDone = new Packet(Packet.PACKET_TYPE.Handshake, null);
 			serverDone.packetString = "done";
-			SendPacket(serverDone, true);
+			sendPacket(serverDone, true);
 		} catch (SendPacketException e) {
 			throw new HandShakeException("Unable to send HandShake serverDone to connection. Terminating.");
 		}

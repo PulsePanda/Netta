@@ -19,13 +19,13 @@
 
 package Netta.Connection.Server;
 
+import Netta.Exceptions.ServerInitializeException;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-
-import Netta.Exceptions.ServerInitializeException;
 
 public abstract class MultiClientServer extends ServerTemplate {
 
@@ -66,7 +66,7 @@ public abstract class MultiClientServer extends ServerTemplate {
 	 * Will not run if the connection is already active.
 	 */
 	public void run() {
-		if (IsConnectionActive()) {
+		if (isConnectionActive()) {
 			System.err.println("Cannot initialize server. Server is already running: " + serverSocket);
 			return;
 		}
