@@ -95,6 +95,15 @@ public abstract class ServerTemplate extends Connection implements Runnable {
 
     }
 
+    /**
+     * Close the server socket
+     *
+     * @throws IOException thrown if there is an error closing the server socket
+     */
+    public void closeServer() throws IOException {
+        serverSocket.close();
+    }
+
     protected void HandShake() throws HandShakeException {
         try {
             @SuppressWarnings("unused")
