@@ -99,8 +99,9 @@ public abstract class ServerTemplate extends Connection implements Runnable {
      * Close the server socket
      *
      * @throws IOException thrown if there is an error closing the server socket
+     * @throws NullPointerException thrown if there is no serverSocket to close
      */
-    public void closeServer() throws IOException {
+    public void closeServer() throws IOException, NullPointerException {
         serverSocket.close();
     }
 

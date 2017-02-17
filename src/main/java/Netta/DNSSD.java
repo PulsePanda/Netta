@@ -18,6 +18,7 @@ import javax.jmdns.ServiceListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 
 /**
@@ -71,21 +72,12 @@ public class DNSSD {
     }
 
     /**
-     * get the service info of a resolved service when discovering
+     * Get the list of available discovered services on the network
      *
-     * @return String service info of resolved service discovery
+     * @return ArrayList containing all ServiceEntry's on the network
      */
-    public String getServiceInfo() {
-        return discoverService.getServiceInfo();
-    }
-
-    /**
-     * get the service name of a resolved service when discovering
-     *
-     * @return String service name of resolved service discovery
-     */
-    public String getServiceName() {
-        return discoverService.getServiceName();
+    public ArrayList<ServiceEntry> getServiceList() {
+        return discoverService.getServiceList();
     }
 
     /**
@@ -145,15 +137,15 @@ class RegisterService extends Thread {
 class DiscoverService extends Thread {
 
     private String serviceType;
-    private String serviceInfo = "";
-    private String serviceName = "";
     private JmDNS mdnsService;
     private ServiceListener mdnsServiceListener;
     private InetAddress address;
+    private ArrayList<ServiceEntry> serviceList;
 
     public DiscoverService(String serviceType, InetAddress address) {
         this.serviceType = serviceType;
         this.address = address;
+        serviceList = new ArrayList();
     }
 
     @Override
@@ -172,13 +164,21 @@ class DiscoverService extends Thread {
                 @Override
                 public void serviceRemoved(ServiceEvent serviceEvent) {
                     // Test service is disappeared.
+                    ServiceEntry e = new ServiceEntry(serviceEvent.getName(), serviceEvent.getInfo().getURL());
+                    for (ServiceEntry temp : serviceList) {
+                        if (temp.getServiceName().equals(e.getServiceName())) {
+                            if (temp.getServiceInfo().equals(e.getServiceInfo())) {
+                                serviceList.remove(temp);
+                            }
+                        }
+                    }
                 }
 
                 @Override
                 public void serviceResolved(ServiceEvent serviceEvent) {
                     // Test service info is resolved.
-                    serviceInfo = serviceEvent.getInfo().getURL();
-                    serviceName = serviceEvent.getName();
+                    ServiceEntry e = new ServiceEntry(serviceEvent.getName(), serviceEvent.getInfo().getURL());
+                    serviceList.add(e);
                 }
             };
 
@@ -186,7 +186,7 @@ class DiscoverService extends Thread {
             mdnsService.addServiceListener(serviceType, mdnsServiceListener);
 
             try {
-                Thread.sleep(30000);
+                Thread.sleep(300000);
             } catch (InterruptedException e) {
             }
         } catch (UnknownHostException e) {
@@ -196,6 +196,10 @@ class DiscoverService extends Thread {
         }
     }
 
+    public ArrayList<ServiceEntry> getServiceList() {
+        return serviceList;
+    }
+
     public void closeServiceDiscovery() {
         mdnsService.removeServiceListener(serviceType, mdnsServiceListener);
         try {
@@ -203,13 +207,7 @@ class DiscoverService extends Thread {
         } catch (IOException e) {
             System.err.println("DNSSD: Error closing service discovery. Details: " + e.getMessage());
         }
-    }
-
-    public String getServiceInfo() {
-        return serviceInfo;
-    }
-
-    public String getServiceName() {
-        return serviceName;
+        serviceList.clear();
     }
 }
+
