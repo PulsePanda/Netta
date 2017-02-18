@@ -102,6 +102,17 @@ public abstract class SingleClientServer extends ServerTemplate {
     }
 
     /**
+     * Close the server socket
+     *
+     * @throws IOException thrown if there is an error closing the server socket
+     */
+    @Override
+    public void closeServer() throws IOException {
+        threadActive = false;
+        super.closeServer();
+    }
+
+    /**
      * Method called by the run function each time the client sends something
      *
      * @param p Packet received by client
