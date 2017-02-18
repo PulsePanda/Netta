@@ -33,7 +33,7 @@ public class ConnectedClient extends Connection implements Runnable {
 
 	/**
 	 * ConnectedClient is designed to be used to handle each client on a server
-	 * that has connected with a MultiClientServer. The server's ThreadAction
+	 * that has connected with a MultiClientServer. The server's packetReceived
 	 * accepts a ConnectedClient object. This is when you take control over what
 	 * client will be able to do.
 	 * 

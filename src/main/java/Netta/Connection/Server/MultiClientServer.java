@@ -35,9 +35,9 @@ public abstract class MultiClientServer extends ServerTemplate {
     /**
      * Multiple Client Server. To start the server, simply create a new thread
      * of this object and start the thread. When a new connection is received,
-     * the ThreadAction(ConnectedClient) method is called. By default, it does
+     * the packetReceived(ConnectedClient) method is called. By default, it does
      * nothing. Designed for simple implementation, simply create a child of
-     * this class and overload the ThreadAction(ConnectedClient) method. The
+     * this class and overload the packetReceived(ConnectedClient) method. The
      * parameter passed into that method will contain the ConnectedClient object
      * that was just received, which holds the connection socket, as well as IO
      * methods. ConnectedClient is a Runnable class, and you can extend
@@ -53,7 +53,7 @@ public abstract class MultiClientServer extends ServerTemplate {
 
     /**
      * Thread.Run method. By default, this method will set up the connection
-     * objects, and call ThreadAction(ConnectedClient) any time there is a new
+     * objects, and call packetReceived(ConnectedClient) any time there is a new
      * connection, and only if the new connection was able to initialize
      * successfully. If there is an error during the initialization steps, the
      * System.err stream will be used detailing the error, and then the thread
@@ -86,8 +86,8 @@ public abstract class MultiClientServer extends ServerTemplate {
                 Socket s = serverSocket.accept();
                 System.out.println("Client connection caught and initialized. Client: " + s);
                 System.out.println("Connection with " + s + " now listening for incoming packets.");
-                ThreadAction(s);
-                // GENERATE NEW KRIPT OBJECT? SO AS TO HAVE SEPERATE KEYS PER
+                clientConnected(s);
+                // GENERATE NEW KRIPT OBJECT? SO AS TO HAVE SEPARATE KEYS PER
                 // CONNECTION //////////
                 CleanClientList();
             } catch (SocketTimeoutException e) {
@@ -123,7 +123,7 @@ public abstract class MultiClientServer extends ServerTemplate {
      *
      * @param client socket that was accepted by the server
      */
-    public void ThreadAction(Socket client) {
+    public void clientConnected(Socket client) {
 
     }
 

@@ -85,20 +85,9 @@ public abstract class ServerTemplate extends Connection implements Runnable {
     }
 
     /**
-     * Override this function
-     * <p>
-     * Thread that is called from within the Server object during it's thread
-     * cycle. Called right after the ServerSocket object accepts a socket, and
-     * passes it into the parameter
-     */
-    protected void ThreadAction() {
-
-    }
-
-    /**
      * Close the server socket
      *
-     * @throws IOException thrown if there is an error closing the server socket
+     * @throws IOException          thrown if there is an error closing the server socket
      * @throws NullPointerException thrown if there is no serverSocket to close
      */
     public void closeServer() throws IOException, NullPointerException {

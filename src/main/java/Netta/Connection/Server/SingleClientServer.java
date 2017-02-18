@@ -23,6 +23,7 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.*;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.NoSuchAlgorithmException;
 
@@ -34,10 +35,10 @@ public abstract class SingleClientServer extends ServerTemplate {
     /**
      * Single Client Server. To start the server, simply create a new thread
      * object of this server and start it. Everything else takes care of itself.
-     * Any time the client sends a packet, the ThreadAction(Packet) method is
+     * Any time the client sends a packet, the packetReceived(Packet) method is
      * called. By default, this does nothing, so you must overload it yourself.
      * The server also does not automatically handle close connection. You must
-     * do that yourself in the ThreadAction(Packet) method.
+     * do that yourself in the packetReceived(Packet) method.
      *
      * @param port the server must host on
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA cipher.
@@ -82,7 +83,7 @@ public abstract class SingleClientServer extends ServerTemplate {
 
             while (isConnectionActive()) {
                 try {
-                    ThreadAction(receivePacket(encryptedPacket));
+                    packetReceived(receivePacket(encryptedPacket));
                 } catch (ReadPacketException e) {
                     System.err.println(e.getMessage() + " Closing connection.");
                     try {
@@ -100,7 +101,16 @@ public abstract class SingleClientServer extends ServerTemplate {
      *
      * @param p Packet received by client
      */
-    protected void ThreadAction(Packet p) {
+    protected void packetReceived(Packet p) {
+
+    }
+
+    /**
+     * Method called by the run function when a client connects to the server
+     *
+     * @param client Socket of the connected client
+     */
+    protected void clientConnected(Socket client) {
 
     }
 
