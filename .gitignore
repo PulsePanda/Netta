@@ -6,6 +6,7 @@
 .project
 /.gradle/
 /build/
+javadoc/
 .metadata
 .idea/
 bin/
