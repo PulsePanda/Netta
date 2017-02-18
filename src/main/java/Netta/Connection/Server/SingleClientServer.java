@@ -75,6 +75,11 @@ public abstract class SingleClientServer extends ServerTemplate {
             } catch (SocketTimeoutException e) {
             } catch (IOException e) {
                 System.err.println("Error accepting a client. Connection refused and reset.");
+                connectedSocket = null;
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e1) {
+                }
             } catch (ConnectionInitializationException e) {
                 System.err.println(e.getMessage() + " Connection refused and reset.");
             } catch (HandShakeException e) {
