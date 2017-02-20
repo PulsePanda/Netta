@@ -53,26 +53,32 @@ public class MediaServer extends SingleClientServer {
         System.out.println("MediaServer: Waiting for client connection...");
 
         while (threadActive) {
-            try {
-                connectedSocket = serverSocket.accept();
-                openIOStreams();
-                System.out.println("MediaServer: Client connection caught and initialized. Client: " + connectedSocket);
-                System.out.println("MediaServer: Connection with " + connectedSocket + " now listening for incoming packets.");
-                HandShake();
-            } catch (SocketTimeoutException e) {
-            } catch (IOException e) {
-                System.err.println("MediaServer: Error accepting a client. Connection refused and reset.");
-                connectedSocket = null;
+            while (connectedSocket == null || !this.isConnectionActive()) {
                 try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e1) {
+                    connectedSocket = serverSocket.accept();
+                    openIOStreams();
+                    System.out.println("MediaServer: Client connection caught and initialized. Client: " + connectedSocket);
+                    System.out.println("MediaServer: Connection with " + connectedSocket + " now listening for incoming packets.");
+                    HandShake();
+                } catch (SocketTimeoutException e) {
+                } catch (IOException e) {
+                    System.err.println("MediaServer: Error accepting a client. Connection refused and reset.");
+                    connectedSocket = null;
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e1) {
+                    }
+                } catch (ConnectionInitializationException e) {
+                    System.err.println("MediaServer: " + e.getMessage() + " Connection refused and reset.");
+                } catch (HandShakeException e) {
+                    System.err.println("MediaServer: " + e.getMessage());
                 }
-            } catch (ConnectionInitializationException e) {
-                System.err.println("MediaServer: " + e.getMessage() + " Connection refused and reset.");
-            } catch (HandShakeException e) {
-                System.err.println("MediaServer: " + e.getMessage());
             }
 
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+            }
             startStreaming();
 
             System.out.println("MediaServer: Stream complete. Closing down server.");
@@ -88,14 +94,14 @@ public class MediaServer extends SingleClientServer {
     }
 
     private void startStreaming() {
-        // Assign input and output streams for music
+        // Assign input and output streams
         try {
             in = new FileInputStream(mediaFile);
             out = this.connectedSocket.getOutputStream();
         } catch (FileNotFoundException e) {
             System.err.println("MediaServer: Media file not found!");
         } catch (IOException e) {
-            System.err.println("MediaServer: Unable to read media file!");
+            System.err.println("MediaServer: Unable to obtain output stream!");
         }
 
         byte buffer[] = new byte[2048];
@@ -108,4 +114,5 @@ public class MediaServer extends SingleClientServer {
             e.printStackTrace();
         }
     }
+
 }
