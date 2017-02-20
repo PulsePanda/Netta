@@ -29,8 +29,9 @@ import java.security.NoSuchAlgorithmException;
 
 public abstract class SingleClientServer extends ServerTemplate {
 
-    private boolean threadActive = false;
-    private boolean encryptedPacket = true;
+    protected boolean threadActive = false;
+    protected boolean encryptedPacket = true;
+    protected boolean handshakeComplete = false;
 
     /**
      * Single Client Server. To start the server, simply create a new thread
@@ -148,5 +149,71 @@ public abstract class SingleClientServer extends ServerTemplate {
      */
     public void setPacketEncrypted(boolean encrypted) {
         encryptedPacket = encrypted;
+    }
+
+
+    /**
+     * Handshake helper method to initialize connection with Server. This method
+     * is called by the constructor to initialize the HandShake with the client.
+     * After the HandShake is successful, this method will be unable to be
+     * called again for this connection. If called, a HandShakeException will be
+     * thrown.
+     *
+     * @throws HandShakeException thrown if the handshake is unsuccessful. Details in
+     *                            getMessage().
+     */
+    protected void HandShake() throws HandShakeException {
+        if (handshakeComplete)
+            throw new HandShakeException("Unable to HandShake with client. HandShake has already been completed.");
+
+        try {
+            @SuppressWarnings("unused")
+            Packet clientHello = receivePacket(false);
+        } catch (ReadPacketException e) {
+            throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
+        }
+
+        try {
+            Packet serverHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
+            sendPacket(serverHello, false);
+        } catch (SendPacketException e) {
+            throw new HandShakeException("Unable to send HandShake serverHello to connection. Terminating.");
+        }
+
+        try {
+            Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
+            serverKeyExchange.packetKey = kript.getPublicKey();
+            sendPacket(serverKeyExchange, false);
+        } catch (SendPacketException e) {
+            throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
+        }
+
+        try {
+            Packet clientKeyExchange = receivePacket(true);
+            kript.setRemotePublicKey(clientKeyExchange.packetKey);
+        } catch (ReadPacketException e) {
+            throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
+        }
+
+        try {
+            Packet clientDone = receivePacket(true);
+            if (!clientDone.packetString.equals("done")) {
+                throw new HandShakeException(
+                        "Unable to decrypt PacketString from connection. HandShake failure. Terminating.");
+            }
+        } catch (ReadPacketException e) {
+            throw new HandShakeException("Unable to receive HandShake clientDone from connection. Terminating.");
+        }
+
+        try {
+            Packet serverDone = new Packet(Packet.PACKET_TYPE.Handshake, null);
+            serverDone.packetString = "done";
+            sendPacket(serverDone, true);
+        } catch (SendPacketException e) {
+            throw new HandShakeException("Unable to send HandShake serverDone to connection. Terminating.");
+        }
+
+        handshakeComplete = true;
+        System.out.println("HandShake with client complete!");
     }
 }
