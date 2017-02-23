@@ -100,8 +100,10 @@ public class MediaServer extends SingleClientServer {
             out = this.connectedSocket.getOutputStream();
         } catch (FileNotFoundException e) {
             System.err.println("MediaServer: Media file not found!");
+            return;
         } catch (IOException e) {
             System.err.println("MediaServer: Unable to obtain output stream!");
+            return;
         }
 
         byte buffer[] = new byte[2048];
@@ -112,6 +114,12 @@ public class MediaServer extends SingleClientServer {
         } catch (IOException e) {
             System.err.println("MediaServer: Error streaming media to Client. Details: ");
             e.printStackTrace();
+        }
+
+        try {
+            out.flush();
+            out.close();
+        } catch (IOException e) {
         }
     }
 
