@@ -6,7 +6,6 @@
 .project
 /.gradle/
 /build/
-javadoc/
 .metadata
 .idea/
 bin/
@@ -218,4 +217,3 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
-docs/
