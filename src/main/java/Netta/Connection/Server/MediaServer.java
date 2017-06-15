@@ -17,6 +17,7 @@ public class MediaServer extends SingleClientServer {
     private FileInputStream in;
     private OutputStream out;
     private File mediaFile;
+    private boolean streaming = false;
 
     /**
      * Media Server. To start the server, simply create a new thread
@@ -53,6 +54,7 @@ public class MediaServer extends SingleClientServer {
         System.out.println("MediaServer: Waiting for client connection...");
 
         while (threadActive) {
+            streaming = true;
             while (connectedSocket == null || !this.isConnectionActive()) {
                 try {
                     connectedSocket = serverSocket.accept();
@@ -79,7 +81,9 @@ public class MediaServer extends SingleClientServer {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
             }
+
             startStreaming();
+            streaming = false;
 
             System.out.println("MediaServer: Stream complete. Closing down server.");
             try {
@@ -121,6 +125,13 @@ public class MediaServer extends SingleClientServer {
             out.close();
         } catch (IOException e) {
         }
+    }
+
+    public boolean isStreaming() {
+        if (isConnectionActive() || streaming)
+            return true;
+        else
+            return false;
     }
 
 }
