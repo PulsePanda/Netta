@@ -23,21 +23,23 @@ import Netta.Connection.Packet;
 import Netta.Exceptions.*;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.NoSuchAlgorithmException;
 
 public abstract class SingleClientServer extends ServerTemplate {
 
-    private boolean threadActive = false;
-    private boolean encryptedPacket = true;
+    protected boolean threadActive = false;
+    protected boolean encryptedPacket = true;
+    protected boolean handshakeComplete = false;
 
     /**
      * Single Client Server. To start the server, simply create a new thread
      * object of this server and start it. Everything else takes care of itself.
-     * Any time the client sends a packet, the ThreadAction(Packet) method is
+     * Any time the client sends a packet, the packetReceived(Packet) method is
      * called. By default, this does nothing, so you must overload it yourself.
      * The server also does not automatically handle close connection. You must
-     * do that yourself in the ThreadAction(Packet) method.
+     * do that yourself in the packetReceived(Packet) method.
      *
      * @param port the server must host on
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA cipher.
@@ -74,6 +76,11 @@ public abstract class SingleClientServer extends ServerTemplate {
             } catch (SocketTimeoutException e) {
             } catch (IOException e) {
                 System.err.println("Error accepting a client. Connection refused and reset.");
+                connectedSocket = null;
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e1) {
+                }
             } catch (ConnectionInitializationException e) {
                 System.err.println(e.getMessage() + " Connection refused and reset.");
             } catch (HandShakeException e) {
@@ -82,7 +89,7 @@ public abstract class SingleClientServer extends ServerTemplate {
 
             while (isConnectionActive()) {
                 try {
-                    ThreadAction(receivePacket(encryptedPacket));
+                    packetReceived(receivePacket(encryptedPacket));
                 } catch (ReadPacketException e) {
                     System.err.println(e.getMessage() + " Closing connection.");
                     try {
@@ -96,11 +103,31 @@ public abstract class SingleClientServer extends ServerTemplate {
     }
 
     /**
+     * Close the server socket
+     *
+     * @throws IOException thrown if there is an error closing the server socket
+     */
+    @Override
+    public void closeServer() throws IOException {
+        threadActive = false;
+        super.closeServer();
+    }
+
+    /**
      * Method called by the run function each time the client sends something
      *
      * @param p Packet received by client
      */
-    protected void ThreadAction(Packet p) {
+    protected void packetReceived(Packet p) {
+
+    }
+
+    /**
+     * Method called by the run function when a client connects to the server
+     *
+     * @param client Socket of the connected client
+     */
+    protected void clientConnected(Socket client) {
 
     }
 
@@ -122,5 +149,71 @@ public abstract class SingleClientServer extends ServerTemplate {
      */
     public void setPacketEncrypted(boolean encrypted) {
         encryptedPacket = encrypted;
+    }
+
+
+    /**
+     * Handshake helper method to initialize connection with Server. This method
+     * is called by the constructor to initialize the HandShake with the client.
+     * After the HandShake is successful, this method will be unable to be
+     * called again for this connection. If called, a HandShakeException will be
+     * thrown.
+     *
+     * @throws HandShakeException thrown if the handshake is unsuccessful. Details in
+     *                            getMessage().
+     */
+    protected void HandShake() throws HandShakeException {
+        if (handshakeComplete)
+            throw new HandShakeException("Unable to HandShake with client. HandShake has already been completed.");
+
+        try {
+            @SuppressWarnings("unused")
+            Packet clientHello = receivePacket(false);
+        } catch (ReadPacketException e) {
+            throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
+        }
+
+        try {
+            Packet serverHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
+            sendPacket(serverHello, false);
+        } catch (SendPacketException e) {
+            throw new HandShakeException("Unable to send HandShake serverHello to connection. Terminating.");
+        }
+
+        try {
+            Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
+            serverKeyExchange.packetKey = kript.getPublicKey();
+            sendPacket(serverKeyExchange, false);
+        } catch (SendPacketException e) {
+            throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
+        }
+
+        try {
+            Packet clientKeyExchange = receivePacket(true);
+            kript.setRemotePublicKey(clientKeyExchange.packetKey);
+        } catch (ReadPacketException e) {
+            throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
+        }
+
+        try {
+            Packet clientDone = receivePacket(true);
+            if (!clientDone.packetString.equals("done")) {
+                throw new HandShakeException(
+                        "Unable to decrypt PacketString from connection. HandShake failure. Terminating.");
+            }
+        } catch (ReadPacketException e) {
+            throw new HandShakeException("Unable to receive HandShake clientDone from connection. Terminating.");
+        }
+
+        try {
+            Packet serverDone = new Packet(Packet.PACKET_TYPE.Handshake, null);
+            serverDone.packetString = "done";
+            sendPacket(serverDone, true);
+        } catch (SendPacketException e) {
+            throw new HandShakeException("Unable to send HandShake serverDone to connection. Terminating.");
+        }
+
+        handshakeComplete = true;
+        System.out.println("HandShake with client complete!");
     }
 }

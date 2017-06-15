@@ -85,65 +85,12 @@ public abstract class ServerTemplate extends Connection implements Runnable {
     }
 
     /**
-     * Override this function
-     * <p>
-     * Thread that is called from within the Server object during it's thread
-     * cycle. Called right after the ServerSocket object accepts a socket, and
-     * passes it into the parameter
-     */
-    protected void ThreadAction() {
-
-    }
-
-    /**
      * Close the server socket
      *
-     * @throws IOException thrown if there is an error closing the server socket
+     * @throws IOException          thrown if there is an error closing the server socket
      * @throws NullPointerException thrown if there is no serverSocket to close
      */
     public void closeServer() throws IOException, NullPointerException {
         serverSocket.close();
-    }
-
-    protected void HandShake() throws HandShakeException {
-        try {
-            @SuppressWarnings("unused")
-            Packet clientHello = receivePacket(false);
-        } catch (ReadPacketException e) {
-            throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
-        }
-
-        try {
-            Packet serverHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
-            sendPacket(serverHello, false);
-        } catch (SendPacketException e) {
-            throw new HandShakeException("Unable to send HandShake serverHello to connection. Terminating.");
-        }
-
-        try {
-            Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
-            serverKeyExchange.packetKey = kript.getPublicKey();
-            sendPacket(serverKeyExchange, false);
-        } catch (SendPacketException e) {
-            throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
-        }
-
-        try {
-            Packet clientKeyExchange = receivePacket(true);
-            kript.setRemotePublicKey(clientKeyExchange.packetKey);
-        } catch (ReadPacketException e) {
-            throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
-        }
-
-        try {
-            Packet clientDone = receivePacket(true);
-            if (clientDone.packetString != "done")
-                throw new HandShakeException(
-                        "Unable to decrypt Packet from connection. HandShake failure. Terminating.");
-        } catch (ReadPacketException e) {
-            throw new HandShakeException("Unable to receive HandShake clientDone from connection. Terminating.");
-        }
-
-        System.out.println("HandShake with client complete!");
     }
 }
