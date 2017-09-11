@@ -50,6 +50,9 @@ public abstract class SingleClientServer extends ServerTemplate {
         super(port, kript);
     }
 
+    /**
+     * Handles itself, do not over ride this function.
+     */
     public void run() {
         if (isConnectionActive()) {
             System.err.println("Cannot initialize server. Server is already running: " + serverSocket);
