@@ -46,10 +46,11 @@ public abstract class ClientTemplate extends Connection implements Runnable {
      *
      * @param serverIP The IP address of the server to connect to
      * @param port     the port of the server to connect to
+     * @param kript    Encryption kript object if the connection will be encrypted, otherwise null
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA keys.
      */
-    public ClientTemplate(String serverIP, int port) throws NoSuchAlgorithmException {
-        super(new Kript());
+    public ClientTemplate(String serverIP, int port, Kript kript) throws NoSuchAlgorithmException {
+        super(kript);
         this.serverIP = serverIP;
         this.port = port;
     }
@@ -86,7 +87,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 
         while (isConnectionActive()) {
             try {
-                Packet p = receivePacket(encryptedPacket);
+                Packet p = receivePacket();
                 packetReceived(p);
             } catch (ReadPacketException e) {
                 System.err.println(e.getMessage() + " Closing connection.");
@@ -137,13 +138,13 @@ public abstract class ClientTemplate extends Connection implements Runnable {
     protected void HandShake() throws HandShakeException {
         try {
             Packet clientHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
-            sendPacket(clientHello, false);
+            sendPacket(clientHello);
         } catch (SendPacketException e) {
             throw new HandShakeException("Unable to send HandShake clientHello to connection. Terminating.");
         }
 
         try {
-            Packet serverHello = receivePacket(false);
+            Packet serverHello = receivePacket();
             if (serverHello.packetType != Packet.PACKET_TYPE.Handshake)
                 throw new HandShakeException(
                         "HandShake serverHello from connection is not a HandShake Packet. Error with connection. Terminating.");
@@ -152,7 +153,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
         }
 
         try {
-            Packet serverKeyExchange = receivePacket(false);
+            Packet serverKeyExchange = receivePacket();
             kript.setRemotePublicKey(serverKeyExchange.packetKey);
         } catch (ReadPacketException e) {
             throw new HandShakeException("Unable to receive HandShake serverKeyExchange from connection. Terminating.");
@@ -161,7 +162,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
         try {
             Packet clientKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
             clientKeyExchange.packetKey = kript.getPublicKey();
-            sendPacket(clientKeyExchange, true);
+            sendPacket(clientKeyExchange);
         } catch (SendPacketException e) {
             e.printStackTrace();
             throw new HandShakeException("Unable to send HandShake clientKeyExchange to connection. Terminating.");
@@ -170,13 +171,13 @@ public abstract class ClientTemplate extends Connection implements Runnable {
         try {
             Packet clientDone = new Packet(Packet.PACKET_TYPE.Handshake, null);
             clientDone.packetString = "done";
-            sendPacket(clientDone, true);
+            sendPacket(clientDone);
         } catch (SendPacketException e) {
             throw new HandShakeException("Unable to send HandShake clientDone to connection. Terminating.");
         }
 
         try {
-            Packet serverDone = receivePacket(true);
+            Packet serverDone = receivePacket();
             if (!serverDone.packetString.equals("done")) {
                 throw new HandShakeException(
                         "Unable to decrypt PacketString from connection. HandShake failure. Terminating.");

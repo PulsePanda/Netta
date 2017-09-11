@@ -21,16 +21,16 @@ package Netta.Exceptions;
 
 public class ConfigurationException extends Exception {
 
-	/**
-	 * Thrown if there are issues handling a Configuration file. Details of the
-	 * error are held within the exception object's message()
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * Thrown if there are issues handling a Configuration file. Details of the
+     * error are held within the exception object's message()
+     */
+    private static final long serialVersionUID = 1L;
 
-	public ConfigurationException() {
-	}
+    public ConfigurationException() {
+    }
 
-	public ConfigurationException(String message) {
-		super(message);
-	}
+    public ConfigurationException(String message) {
+        super(message);
+    }
 }

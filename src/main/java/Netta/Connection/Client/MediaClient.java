@@ -3,16 +3,12 @@ package Netta.Connection.Client;
 import Netta.Exceptions.ConnectionException;
 import Netta.Exceptions.ConnectionInitializationException;
 import Netta.Exceptions.HandShakeException;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 
 /**
@@ -38,7 +34,7 @@ public class MediaClient extends ClientTemplate {
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA keys.
      */
     public MediaClient(String serverIP, int port, String mediaType) throws NoSuchAlgorithmException {
-        super(serverIP, port);
+        super(serverIP, port, null);
         this.mediaType = mediaType;
     }
 

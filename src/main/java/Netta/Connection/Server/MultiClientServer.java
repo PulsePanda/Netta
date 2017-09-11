@@ -19,6 +19,7 @@
 
 package Netta.Connection.Server;
 
+import Kript.Kript;
 import Netta.Exceptions.ServerInitializeException;
 
 import java.io.IOException;
@@ -43,11 +44,12 @@ public abstract class MultiClientServer extends ServerTemplate {
      * methods. ConnectedClient is a Runnable class, and you can extend
      * everything within it for customizability.
      *
-     * @param port that you want the server to host on
+     * @param port  that you want the server to host on
+     * @param kript Encryption kript object if the connection will be encrypted, otherwise null
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA cipher.
      */
-    public MultiClientServer(int port) throws NoSuchAlgorithmException {
-        super(port);
+    public MultiClientServer(int port, Kript kript) throws NoSuchAlgorithmException {
+        super(port, kript);
         connectedClients = new ArrayList<ConnectedClient>();
     }
 

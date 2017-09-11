@@ -21,16 +21,16 @@ package Netta.Exceptions;
 
 public class SendPacketException extends Exception {
 
-	/**
-	 * Thrown if there are issues initializing a network connection of any type.
-	 * Details of the error are held within the exception object's message()
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * Thrown if there are issues initializing a network connection of any type.
+     * Details of the error are held within the exception object's message()
+     */
+    private static final long serialVersionUID = 1L;
 
-	public SendPacketException() {
-	}
+    public SendPacketException() {
+    }
 
-	public SendPacketException(String message) {
-		super(message);
-	}
+    public SendPacketException(String message) {
+        super(message);
+    }
 }

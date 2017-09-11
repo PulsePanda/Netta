@@ -21,16 +21,16 @@ package Netta.Exceptions;
 
 public class HandShakeException extends Exception {
 
-	/**
-	 * Thrown if there are issues handling the connection handshake. Details of
-	 * the error are held within the exception object's message()
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * Thrown if there are issues handling the connection handshake. Details of
+     * the error are held within the exception object's message()
+     */
+    private static final long serialVersionUID = 1L;
 
-	public HandShakeException() {
-	}
+    public HandShakeException() {
+    }
 
-	public HandShakeException(String message) {
-		super(message);
-	}
+    public HandShakeException(String message) {
+        super(message);
+    }
 }

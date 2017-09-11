@@ -21,15 +21,15 @@ package Netta.Exceptions;
 
 public class ServerInitializeException extends Exception {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	public ServerInitializeException() {
-	}
+    public ServerInitializeException() {
+    }
 
-	public ServerInitializeException(String message) {
-		super(message);
-	}
+    public ServerInitializeException(String message) {
+        super(message);
+    }
 }

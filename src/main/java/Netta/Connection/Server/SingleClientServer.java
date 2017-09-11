@@ -19,6 +19,7 @@
 
 package Netta.Connection.Server;
 
+import Kript.Kript;
 import Netta.Connection.Packet;
 import Netta.Exceptions.*;
 
@@ -41,11 +42,12 @@ public abstract class SingleClientServer extends ServerTemplate {
      * The server also does not automatically handle close connection. You must
      * do that yourself in the packetReceived(Packet) method.
      *
-     * @param port the server must host on
+     * @param port  the server must host on
+     * @param kript Encryption kript object if the connection will be encrypted, otherwise null
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA cipher.
      */
-    public SingleClientServer(int port) throws NoSuchAlgorithmException {
-        super(port);
+    public SingleClientServer(int port, Kript kript) throws NoSuchAlgorithmException {
+        super(port, kript);
     }
 
     public void run() {
@@ -89,7 +91,7 @@ public abstract class SingleClientServer extends ServerTemplate {
 
             while (isConnectionActive()) {
                 try {
-                    packetReceived(receivePacket(encryptedPacket));
+                    packetReceived(receivePacket());
                 } catch (ReadPacketException e) {
                     System.err.println(e.getMessage() + " Closing connection.");
                     try {
@@ -168,14 +170,14 @@ public abstract class SingleClientServer extends ServerTemplate {
 
         try {
             @SuppressWarnings("unused")
-            Packet clientHello = receivePacket(false);
+            Packet clientHello = receivePacket();
         } catch (ReadPacketException e) {
             throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
         }
 
         try {
             Packet serverHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
-            sendPacket(serverHello, false);
+            sendPacket(serverHello);
         } catch (SendPacketException e) {
             throw new HandShakeException("Unable to send HandShake serverHello to connection. Terminating.");
         }
@@ -183,20 +185,20 @@ public abstract class SingleClientServer extends ServerTemplate {
         try {
             Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
             serverKeyExchange.packetKey = kript.getPublicKey();
-            sendPacket(serverKeyExchange, false);
+            sendPacket(serverKeyExchange);
         } catch (SendPacketException e) {
             throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
         }
 
         try {
-            Packet clientKeyExchange = receivePacket(true);
+            Packet clientKeyExchange = receivePacket();
             kript.setRemotePublicKey(clientKeyExchange.packetKey);
         } catch (ReadPacketException e) {
             throw new HandShakeException("Unable to receive HandShake clientKeyExchange from connection. Terminating.");
         }
 
         try {
-            Packet clientDone = receivePacket(true);
+            Packet clientDone = receivePacket();
             if (!clientDone.packetString.equals("done")) {
                 throw new HandShakeException(
                         "Unable to decrypt PacketString from connection. HandShake failure. Terminating.");
@@ -208,7 +210,7 @@ public abstract class SingleClientServer extends ServerTemplate {
         try {
             Packet serverDone = new Packet(Packet.PACKET_TYPE.Handshake, null);
             serverDone.packetString = "done";
-            sendPacket(serverDone, true);
+            sendPacket(serverDone);
         } catch (SendPacketException e) {
             throw new HandShakeException("Unable to send HandShake serverDone to connection. Terminating.");
         }

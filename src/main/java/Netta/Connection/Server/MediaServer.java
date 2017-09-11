@@ -30,7 +30,7 @@ public class MediaServer extends SingleClientServer {
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA cipher.
      */
     public MediaServer(int port, File mediaFile) throws NoSuchAlgorithmException {
-        super(port);
+        super(port, null);
         this.mediaFile = mediaFile;
     }
 

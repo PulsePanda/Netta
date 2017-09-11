@@ -21,10 +21,6 @@ package Netta.Connection.Server;
 
 import Kript.Kript;
 import Netta.Connection.Connection;
-import Netta.Connection.Packet;
-import Netta.Exceptions.HandShakeException;
-import Netta.Exceptions.ReadPacketException;
-import Netta.Exceptions.SendPacketException;
 import Netta.Exceptions.ServerInitializeException;
 
 import java.io.IOException;
@@ -42,10 +38,11 @@ public abstract class ServerTemplate extends Connection implements Runnable {
      * Basic Server Template. Doesn't favor either Multi client or Single
      * client. Abstract, used by Multi/Single Client servers.
      *
-     * @param port to host the server on.
+     * @param port  to host the server on.
+     * @param kript Encryption kript object if the connection will be encrypted, otherwise null
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA keys.
      */
-    public ServerTemplate(int port) throws NoSuchAlgorithmException {
+    public ServerTemplate(int port, Kript kript) throws NoSuchAlgorithmException {
         super(new Kript());
         this.port = port;
     }

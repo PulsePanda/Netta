@@ -21,16 +21,16 @@ package Netta.Exceptions;
 
 public class ReadPacketException extends Exception {
 
-	/**
-	 * Thrown if there are issues initializing a network connection of any type.
-	 * Details of the error are held within the exception object's message()
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * Thrown if there are issues initializing a network connection of any type.
+     * Details of the error are held within the exception object's message()
+     */
+    private static final long serialVersionUID = 1L;
 
-	public ReadPacketException() {
-	}
+    public ReadPacketException() {
+    }
 
-	public ReadPacketException(String message) {
-		super(message);
-	}
+    public ReadPacketException(String message) {
+        super(message);
+    }
 }
