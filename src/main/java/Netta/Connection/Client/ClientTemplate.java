@@ -115,27 +115,8 @@ public abstract class ClientTemplate extends Connection implements Runnable {
 
     }
 
-    /**
-     * Returns the value of EncryptedPacket. This value is what determines
-     * whether the ReadPacket method will try to decrypt the data.
-     *
-     * @return boolean if true the data is going to be decrypted
-     */
-    public boolean getPacketEncrypted() {
-        return encryptedPacket;
-    }
-
-    /**
-     * Sets the EncryptedPacket variable. Determines whether incoming packets
-     * are going to need to be decrypted.
-     *
-     * @param encrypted boolean. True will have Netta try to decrypt each packet.
-     */
-    public void setPacketEncrypted(boolean encrypted) {
-        encryptedPacket = encrypted;
-    }
-
     protected void HandShake() throws HandShakeException {
+        setEncrypted(false);
         try {
             Packet clientHello = new Packet(Packet.PACKET_TYPE.Handshake, null);
             sendPacket(clientHello);
@@ -155,6 +136,7 @@ public abstract class ClientTemplate extends Connection implements Runnable {
         try {
             Packet serverKeyExchange = receivePacket();
             kript.setRemotePublicKey(serverKeyExchange.packetKey);
+            setEncrypted(true);
         } catch (ReadPacketException e) {
             throw new HandShakeException("Unable to receive HandShake serverKeyExchange from connection. Terminating.");
         }

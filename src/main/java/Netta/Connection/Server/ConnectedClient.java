@@ -109,7 +109,7 @@ public class ConnectedClient extends Connection implements Runnable {
             throw new HandShakeException("Unable to HandShake with client. HandShake has already been completed.");
 
         try {
-            @SuppressWarnings("unused")
+            setEncrypted(false);
             Packet clientHello = receivePacket();
         } catch (ReadPacketException e) {
             throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
@@ -126,6 +126,7 @@ public class ConnectedClient extends Connection implements Runnable {
             Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
             serverKeyExchange.packetKey = kript.getPublicKey();
             sendPacket(serverKeyExchange);
+            setEncrypted(true);
         } catch (SendPacketException e) {
             throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
         }

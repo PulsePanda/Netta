@@ -43,7 +43,7 @@ public abstract class ServerTemplate extends Connection implements Runnable {
      * @throws NoSuchAlgorithmException when there is an issue creating the RSA keys.
      */
     public ServerTemplate(int port, Kript kript) throws NoSuchAlgorithmException {
-        super(new Kript());
+        super(kript);
         this.port = port;
     }
 

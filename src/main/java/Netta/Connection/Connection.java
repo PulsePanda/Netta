@@ -124,6 +124,17 @@ public abstract class Connection {
     }
 
     /**
+     * Set whether the packets are encrypted. Used only for handshake
+     *
+     * @param encrypted
+     */
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
+        // TODO i'm not convinced that this is instantly forcing communications to be encrypted. I think it needs to reset the read functionality
+//        Thread.currentThread().interrupt();
+    }
+
+    /**
      * Send Packet. This method sends a packet p to the connected socket. It is
      * important to note that this send is NOT converted to bytes, it is only
      * sent as a packet. This function cannot be called if the connection is not
@@ -185,7 +196,7 @@ public abstract class Connection {
         if (!connectionActive)
             return p;
 
-        if (encrypted) {
+        if (encrypted && !Thread.interrupted()) {
             try {
                 byte[] encryptedBytes = (byte[]) in.readObject();
                 byte[] packetBytes = kript.decrypt(encryptedBytes);

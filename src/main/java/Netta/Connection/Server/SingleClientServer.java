@@ -137,27 +137,6 @@ public abstract class SingleClientServer extends ServerTemplate {
     }
 
     /**
-     * Returns the value of EncryptedPacket. This value is what determines
-     * whether the ReadPacket method will try to decrypt the data.
-     *
-     * @return boolean if true the data is going to be decrypted
-     */
-    public boolean getPacketEncrypted() {
-        return encryptedPacket;
-    }
-
-    /**
-     * Sets the EncryptedPacket variable. Determines whether incoming packets
-     * are going to need to be decrypted.
-     *
-     * @param encrypted boolean. True will have Netta try to decrypt each packet.
-     */
-    public void setPacketEncrypted(boolean encrypted) {
-        encryptedPacket = encrypted;
-    }
-
-
-    /**
      * Handshake helper method to initialize connection with Server. This method
      * is called by the constructor to initialize the HandShake with the client.
      * After the HandShake is successful, this method will be unable to be
@@ -172,7 +151,7 @@ public abstract class SingleClientServer extends ServerTemplate {
             throw new HandShakeException("Unable to HandShake with client. HandShake has already been completed.");
 
         try {
-            @SuppressWarnings("unused")
+            setEncrypted(false);
             Packet clientHello = receivePacket();
         } catch (ReadPacketException e) {
             throw new HandShakeException("Unable to receive HandShake clientHello from connection. Terminating.");
@@ -189,6 +168,7 @@ public abstract class SingleClientServer extends ServerTemplate {
             Packet serverKeyExchange = new Packet(Packet.PACKET_TYPE.Handshake, null);
             serverKeyExchange.packetKey = kript.getPublicKey();
             sendPacket(serverKeyExchange);
+            setEncrypted(true);
         } catch (SendPacketException e) {
             throw new HandShakeException("Unable to send HandShake serverKeyExchange to connection. Terminating.");
         }
